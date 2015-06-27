@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">TED</string>
+
+    <string name="title_section1">Profile</string>
+    <string name="title_section2">Photo Sharing</string>
+    <string name="title_section3">Event Details</string>
+    <string name="title_section4">Notifications</string>
+    <string name="title_section5">More Info</string>
+
+    <string name="hello_world">Hello world!</string>
+
+    <string name="action_settings">Settings</string>
+
+
+
+</resources>

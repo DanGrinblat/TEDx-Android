@@ -40,7 +40,7 @@ import com.example.dan.ted.TED.MainActivity;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<Cursor> {
-
+    SessionManager session;
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -63,6 +63,8 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        session = new SessionManager(getApplicationContext());
 
         // Set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -298,6 +300,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
             showProgress(false);
 
             if (success) {
+                session.createLoginSession("name", "mEmail");
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();

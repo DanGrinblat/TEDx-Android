@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.SlidingTabLayout;
 
 import java.util.Locale;
@@ -36,12 +37,14 @@ public class MainActivity extends ActionBarActivity {
      */
     private ViewPager mViewPager;
     private SlidingTabLayout mSlidingTabLayout;
+    SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-
+        //SharedPreferences pref = getApplicationContext().getSharedPreferences("MyPref", 0); // 0 - for private mode
+        //SharedPreferences.Editor editor = pref.edit();
+        session = new SessionManager(getApplicationContext());
+        session.checkLogin();
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

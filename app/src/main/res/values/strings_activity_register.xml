@@ -1,0 +1,20 @@
+<resources>
+    <string name="title_activity_register">Register</string>
+
+    <!-- Strings related to registration -->
+    <string name="prompt_name">Name:</string>
+    <string name="prompt_first_name">First</string>
+    <string name="prompt_last_name">Last</string>
+    <string name="prompt_password_confirmation">Repeat Password</string>
+    <string name="prompt_affiliation">Affiliation</string>
+    <string name="prompt_phone">Phone</string>
+    <string name="prompt_profile">Profile:</string>
+    <string name="register_content_description">Profile Photo</string>
+    <string name="register_add_photo">Add Photo</string>
+    <string name="register_change_photo">Change Photo</string>
+    <string name="error_taken_email">This email address is already taken</string>
+    <string name="error_invalid_name">This name is invalid</string>
+    <string name="error_invalid_affiliation">This affiliation is invalid</string>
+    <string name="error_invalid_phone">This phone number is invalid</string>
+    <string name="error_confirmation_password">Passwords do not match</string>
+</resources>

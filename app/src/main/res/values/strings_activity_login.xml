@@ -6,6 +6,8 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Login</string>
     <string name="action_sign_in_short">Login</string>
+    <string name="action_register">Register</string>
+    <string name="action_register_short">Register</string>
 
     <string name="error_invalid_email">Invalid e-mail address</string>
     <string name="error_invalid_password">Password must be 6 characters or longer</string>

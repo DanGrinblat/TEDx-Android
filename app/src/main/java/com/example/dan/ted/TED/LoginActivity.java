@@ -1,21 +1,18 @@
-package com.example.dan.ted.TED.common;
+package com.example.dan.ted.TED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -27,14 +24,19 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import android.support.v7.app.ActionBarActivity;
+import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.SessionManager;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+
+import org.apache.http.Header;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.example.dan.ted.R;
-import com.example.dan.ted.TED.MainActivity;
 
 /**
  * A login screen that offers login via email/password.
@@ -42,16 +44,9 @@ import com.example.dan.ted.TED.MainActivity;
 public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<Cursor> {
     SessionManager session;
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+   // private UserLoginTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -89,10 +84,26 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
         });
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+
+        mEmailRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(LoginActivity.this, RegisterActivity.class);
+                if (mEmailView.getText().length() > 0) {
+                    String email = mEmailView.getText().toString();
+                    String password = mPasswordView.getText().toString();
+                    i.putExtra("email", email);
+                    i.putExtra("password", password);
+                }
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.hold);
             }
         });
 
@@ -111,9 +122,9 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
+        //if (mAuthTask != null) {
+        //    return;
+        //}
 
         // Reset errors.
         mEmailView.setError(null);
@@ -152,8 +163,9 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            //mAuthTask = new UserLoginTask(email, password);
+            //mAuthTask.execute((Void) null);
+            UserLogin(email, password);
         }
     }
 
@@ -257,64 +269,44 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+    public void UserLogin(final String email, final String password) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.setBasicAuth(email, password);
+        String URL = "http://10.0.3.2:5000/api/v1.0/token";
+        client.get(URL, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int i, Header[] headers, byte[] response) {
+                try {
+                    //JSON Object
+                    String str = new String(response);
+                    JSONObject obj = new JSONObject(str);
+                    String name = obj.getString("name");
+                    String token = obj.getString("token");
+                    session.createLoginSession(name, email, token);
+                    finish();
+                } catch (JSONException e) {
+                    showProgress(false);
+                    Toast.makeText(getApplicationContext(), "JSON Error", Toast.LENGTH_SHORT).show();
                 }
             }
 
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                session.createLoginSession("name", "mEmail");
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+            @Override
+            public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
+                if (response != null) {
+                    showProgress(false);
+                    String str = new String(response);
+                    Toast.makeText(getApplicationContext(), "(Wrong credentials). Message:" + str, Toast.LENGTH_SHORT).show();
+                } else {
+                    showProgress(false);
+                    Toast.makeText(getApplicationContext(), "Timed out.", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
+        });
+    }
 
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
 }
 

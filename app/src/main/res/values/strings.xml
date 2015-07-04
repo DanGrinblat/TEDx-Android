@@ -9,7 +9,20 @@
 
     <string name="hello_world">Hello world!</string>
 
+    <string name="profile_hello">Hello,</string>
+    <string name="profile_email">Email:</string>
+    <string name="profile_phone">Phone:</string>
+    <string name="profile_affiliation">Affiliation:</string>
+    <string name="profile_photo">Photo:</string>
+    <string name="profile_add_photo">Add Photo</string>
+
+    <string name="dialog_email">Email</string>
+    <string name="dialog_phone">Phone</string>
+    <string name="dialog_affiliation">Affiliation</string>
+
+    <string name="action_edit">Edit</string>
     <string name="action_settings">Settings</string>
+    <string name="action_logout">Logout</string>
 
 
 

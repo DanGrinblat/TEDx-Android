@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.SessionManager;
+import com.example.dan.ted.TED.common.UserRequest;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
@@ -46,8 +47,8 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-   // private UserLoginTask mAuthTask = null;
-
+   // private UserRequestTask mAuthTask = null;
+    private static final String url = "http://10.0.3.2:5000/api/v1.0/";
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -156,16 +157,13 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
         }
 
         if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
             focusView.requestFocus();
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            //mAuthTask = new UserLoginTask(email, password);
-            //mAuthTask.execute((Void) null);
-            UserLogin(email, password);
+            UserRequest.getToken(LoginActivity.this, email, password);
+            showProgress(false);
         }
     }
 
@@ -245,9 +243,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
+    public void onLoaderReset(Loader<Cursor> cursorLoader) { }
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -267,41 +263,6 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
-    }
-
-    public void UserLogin(final String email, final String password) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.setBasicAuth(email, password);
-        String URL = "http://10.0.3.2:5000/api/v1.0/token";
-        client.get(URL, new AsyncHttpResponseHandler() {
-            @Override
-            public void onSuccess(int i, Header[] headers, byte[] response) {
-                try {
-                    //JSON Object
-                    String str = new String(response);
-                    JSONObject obj = new JSONObject(str);
-                    String name = obj.getString("name");
-                    String token = obj.getString("token");
-                    session.createLoginSession(name, email, token);
-                    finish();
-                } catch (JSONException e) {
-                    showProgress(false);
-                    Toast.makeText(getApplicationContext(), "JSON Error", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
-                if (response != null) {
-                    showProgress(false);
-                    String str = new String(response);
-                    Toast.makeText(getApplicationContext(), "(Wrong credentials). Message:" + str, Toast.LENGTH_SHORT).show();
-                } else {
-                    showProgress(false);
-                    Toast.makeText(getApplicationContext(), "Timed out.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     @Override

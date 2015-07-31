@@ -2,9 +2,32 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context="com.example.dan.ted.TED.Event_Details">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="Hello Event Details"
-        android:id="@+id/textView" />
+    <LinearLayout android:id="@+id/event_details" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:orientation="vertical"
+    android:layout_marginTop="10dp" android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp" android:layout_marginBottom="10dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/countdown_label" android:layout_gravity="center_horizontal"
+            android:id="@+id/countdown_label" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/countdown_timer" />
+        <Button android:id="@+id/button_meet_speakers" style="?android:textAppearanceSmall"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/title_meet_speakers"
+            android:textStyle="bold" />
+        <Button android:id="@+id/button_learn_event" style="?android:textAppearanceSmall"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/title_learn_event"
+            android:textStyle="bold" />
+        <Button android:id="@+id/button_launch_itinerary" style="?android:textAppearanceSmall"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/title_launch_itinerary"
+            android:textStyle="bold" />
+        <Button android:id="@+id/button_tedxcsu_itinerary" style="?android:textAppearanceSmall"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:text="@string/title_tedxcsu_itinerary"
+            android:textStyle="bold" />
+    </LinearLayout>
 
 </FrameLayout>

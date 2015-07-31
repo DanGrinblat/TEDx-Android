@@ -4,16 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.media.ExifInterface;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,7 +26,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
-import com.example.dan.ted.TED.common.UserLogin;
+import com.example.dan.ted.TED.common.UserRequest;
+import com.example.dan.ted.TED.common.Utility;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 
@@ -43,8 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +50,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
     // private UserRegisterTask mAuthTask = null;
 
     private static final int CAMERA_REQUEST = 1337;
+    private static final String url = "http://10.0.3.2:5000/api/v1.0/";
     private EditText mEmailView;
     private EditText mPasswordView;
     private EditText mPasswordConfirmationView;
@@ -101,7 +96,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             mEmailView.setText(email);
             mPasswordView.setText(password);
             View focusView = mEmailView;
-            if (!email.isEmpty() && !password.isEmpty()) {
+            if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
                 focusView = mPasswordConfirmationView;
             }
             focusView.requestFocus();
@@ -172,13 +167,13 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
 
         boolean cancel = false;
         View focusView = null;
-
+//TODO: Low priority: Turn these into a method call for each (aside from Password, which is special)
         //Check for a valid phone number.
         if (TextUtils.isEmpty(phone)) {
             mPhoneView.setError(getString(R.string.error_field_required));
             focusView = mPhoneView;
             cancel = true;
-        } else if (!isPhoneValid(phone)) {
+        } else if (!Utility.isPhoneValid(phone)) {
             mPhoneView.setError(getString(R.string.error_invalid_phone));
             focusView = mPhoneView;
             cancel = true;
@@ -189,7 +184,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             mAffiliationView.setError(getString(R.string.error_field_required));
             focusView = mAffiliationView;
             cancel = true;
-        } else if (!isAffiliationValid(affiliation)) {
+        } else if (!Utility.isAffiliationValid(affiliation)) {
             mAffiliationView.setError(getString(R.string.error_invalid_affiliation));
             focusView = mAffiliationView;
             cancel = true;
@@ -200,7 +195,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             mLastNameView.setError(getString(R.string.error_field_required));
             focusView = mLastNameView;
             cancel = true;
-        } else if (!isNameValid(lastName)) {
+        } else if (!Utility.isNameValid(lastName)) {
             mLastNameView.setError(getString(R.string.error_invalid_name));
             focusView = mLastNameView;
             cancel = true;
@@ -211,14 +206,14 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             mFirstNameView.setError(getString(R.string.error_field_required));
             focusView = mFirstNameView;
             cancel = true;
-        } else if (!isNameValid(firstName)) {
+        } else if (!Utility.isNameValid(firstName)) {
             mFirstNameView.setError(getString(R.string.error_invalid_name));
             focusView = mFirstNameView;
             cancel = true;
         }
 
         // Check for a valid password, if the user entered one. Then, check if password and confirmation match.
-        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password) || !Utility.isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -233,7 +228,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (!Utility.isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -249,7 +244,6 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             // perform the user register attempt.
             showProgress(true);
             UserRegister(email, password, firstName, lastName, affiliation, phone);
-            showProgress(false);
         }
     }
 
@@ -352,6 +346,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
 
     public void UserRegister(final String email, final String password, final String firstName,
                              final String lastName, final String affiliation, final String phone) {
+        final Context context = getApplicationContext();
         AsyncHttpClient client = new AsyncHttpClient();
         //Replace with a more secure root user/pass method
         client.setBasicAuth("yxsn4kHuZq-936ZM", "YqArG33c-BF4t6xL");
@@ -366,6 +361,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
         }
         catch (JSONException e) {
             Toast.makeText(RegisterActivity.this, "JSON Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+            return;
         }
         StringEntity entity = null;
         try {
@@ -373,10 +369,11 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
             entity.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
         } catch (UnsupportedEncodingException e) {
             Toast.makeText(RegisterActivity.this, "StringEntity Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        String URL = "http://10.0.3.2:5000/api/v1.0/users";
-        client.post(getApplicationContext(), URL, entity, "application/json",
+        String URL = url + "users";
+        client.post(context, URL, entity, "application/json",
                 new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] response) {
@@ -384,11 +381,15 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
                             //JSON Object
                             String str = new String(response);
                             JSONObject obj = new JSONObject(str);
-
-                            UserLogin.Login(getApplicationContext(), email, password);
+                            String photoPostURL = obj.getString("photo_url"); //This photo URL is the URL for posting pictures. It is not the user's photoURL.
+                            if (mCapturedImagePath != null) {
+                                UserRequest.postImage(context, mCapturedImagePath, photoPostURL, email, password);
+                            } //Else, completed without image taken
+                            UserRequest.getToken(context, email, password);
                         } catch (JSONException e) {
                             Toast.makeText(RegisterActivity.this, "JSON Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                         }
+                        showProgress(false);
                     }
 
                     @Override
@@ -405,12 +406,9 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
                         } else {
                             Toast.makeText(RegisterActivity.this, "Timed out.", Toast.LENGTH_SHORT).show();
                         }
+                        showProgress(false);
                     }
                 });
-    }
-
-    public void PostImage(final String file_path) {
-
     }
 
     @Override

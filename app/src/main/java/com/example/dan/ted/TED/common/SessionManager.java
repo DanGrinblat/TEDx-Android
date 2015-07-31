@@ -30,14 +30,13 @@ public class SessionManager {
     // All Shared Preferences Keys
     private static final String IS_LOGIN = "IsLoggedIn";
 
-    // User name (make variable public to access from outside)
-    public static final String KEY_NAME = "name";
-
-    // Email address (make variable public to access from outside)
     public static final String KEY_EMAIL = "email";
-
-    // Token
+    public static final String KEY_ID = "id";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_PHONE = "phone";
+    public static final String KEY_AFFILIATION = "affiliation";
     public static final String KEY_TOKEN = "token";
+    public static final String KEY_PHOTO_URL = "photo_url";
 
     // Constructor
     public SessionManager(Context context){
@@ -49,18 +48,19 @@ public class SessionManager {
     /**
      * Create login session
      * */
-    public void createLoginSession(String name, String email, String token){
+    public void createLoginSession(String email, String name, String phone,
+                                   String affiliation, String token, int id, String photoUrl){
         // Storing login value as TRUE
         editor.putBoolean(IS_LOGIN, true);
 
-        // Storing name in pref
-        editor.putString(KEY_NAME, name);
-
-        // Storing email in pref
+        // Storing values in pref
         editor.putString(KEY_EMAIL, email);
-
-        // Storing token in pref
+        editor.putString(KEY_NAME, name);
+        editor.putInt(KEY_ID, id);
+        editor.putString(KEY_PHONE, phone);
+        editor.putString(KEY_AFFILIATION, affiliation);
         editor.putString(KEY_TOKEN, token);
+        editor.putString(KEY_PHOTO_URL, photoUrl);
 
         // commit changes
         editor.commit();
@@ -69,18 +69,17 @@ public class SessionManager {
     /**
      * Get stored session data
      * */
-    public HashMap<String, String> getUserDetails(){
-        HashMap<String, String> user = new HashMap<String, String>();
-        // user name
+    public HashMap<String, Object> getUserDetails(){
+        HashMap<String, Object> user = new HashMap<String, Object>();
+
         user.put(KEY_NAME, pref.getString(KEY_NAME, null));
-
-        // user email id
         user.put(KEY_EMAIL, pref.getString(KEY_EMAIL, null));
-
-        // user token
+        user.put(KEY_ID, pref.getInt(KEY_ID, 0));
+        user.put(KEY_PHONE, pref.getString(KEY_PHONE, null));
+        user.put(KEY_AFFILIATION, pref.getString(KEY_AFFILIATION, null));
         user.put(KEY_TOKEN, pref.getString(KEY_TOKEN, null));
+        user.put(KEY_PHOTO_URL, pref.getString(KEY_PHOTO_URL, null));
 
-        // return user
         return user;
     }
 
@@ -107,7 +106,7 @@ public class SessionManager {
             editor.clear();
             editor.commit();
 
-            // After logout redirect user to Loing Activity
+            // After logout redirect user to Login Activity
             Intent i = new Intent(_context, LoginActivity.class);
             // Closing all the Activities
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -121,6 +120,8 @@ public class SessionManager {
 
     // Get Login State
     public boolean isLoggedIn(){
+        getUserDetails().get("token");
+
         return pref.getBoolean(IS_LOGIN, false);
     }
 }

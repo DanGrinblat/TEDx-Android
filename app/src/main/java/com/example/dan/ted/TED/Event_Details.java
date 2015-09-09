@@ -1,14 +1,19 @@
 package com.example.dan.ted.TED;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.support.v4.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.Constants;
+import com.example.dan.ted.TED.common.FragmentChangeInterface;
 
 
 /**
@@ -19,17 +24,24 @@ import com.example.dan.ted.R;
  * Use the {@link Event_Details#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Event_Details extends Fragment {
+public class Event_Details extends Fragment implements FragmentChangeInterface{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private View mainView;
+    private Button mMeetSpeakersButton;
+
+
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
-    //private OnFragmentInteractionListener mListener;
+    @Override
+    public void fragmentBecameVisible() {
+        System.out.println("TestFragment");
+    }
 
     /**
      * Use this factory method to create a new instance of
@@ -66,7 +78,26 @@ public class Event_Details extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_event_details, container, false);
+        mainView = inflater.inflate(R.layout.fragment_event_details, container, false);
+        mMeetSpeakersButton = (Button) mainView.findViewById(R.id.button_meet_speakers);
+        mMeetSpeakersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*Fragment newFragment = new ImageListFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(android.R.id.content, newFragment);
+
+                transaction.addToBackStack(null);
+                transaction.commit();
+*/
+                Intent intent = new Intent(getActivity(), ImageActivity.class);
+                intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImageListFragment.INDEX);
+                startActivity(intent);
+               // getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fr, tag).commit();
+
+            }
+        });
+        return mainView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

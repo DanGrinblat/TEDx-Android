@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.FragmentChangeInterface;
 
 
 /**
@@ -19,7 +20,7 @@ import com.example.dan.ted.R;
  * Use the {@link More_Info#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class More_Info extends Fragment {
+public class More_Info extends Fragment implements FragmentChangeInterface{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,8 +30,10 @@ public class More_Info extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    //private OnFragmentInteractionListener mListener;
-
+    @Override
+    public void fragmentBecameVisible() {
+        System.out.println("TestFragment");
+    }
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.

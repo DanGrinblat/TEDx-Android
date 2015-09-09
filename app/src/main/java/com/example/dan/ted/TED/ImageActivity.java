@@ -32,6 +32,15 @@ public class ImageActivity extends FragmentActivity {
                 }
                 titleRes = R.string.ac_name_image_pager;
                 break;
+            case ImageListFragment.INDEX:
+                tag = ImageListFragment.class.getSimpleName();
+                fr = getSupportFragmentManager().findFragmentByTag(tag);
+                if (fr == null) {
+                    fr = new ImageListFragment();
+                    fr.setArguments(getIntent().getExtras());
+                }
+                titleRes = R.string.title_meet_speakers;
+                break;
         }
         setTitle(titleRes);
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fr, tag).commit();

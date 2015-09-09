@@ -2,7 +2,7 @@
     <string name="app_name">TEDxCLE</string>
 
     <string name="title_section1">Profile</string>
-    <string name="title_section2">Photo Sharing</string>
+    <string name="title_section2">Photo Gallery</string>
     <string name="title_section3">Event Details</string>
     <string name="title_section4">Notifications</string>
     <string name="title_section5">More Info</string>
@@ -20,11 +20,12 @@
     <string name="profile_photo">Photo:</string>
     <string name="profile_no_photo">No Photo</string>
     <string name="connection_error">Connection error.</string>
+    <string name="none">None.</string>
 
     <string name="dialog_add_photo">Add Photo</string>
-    <string name="dialog_email">Email</string>
-    <string name="dialog_phone">Phone</string>
-    <string name="dialog_affiliation">Affiliation</string>
+    <string name="dialog_email">New Email</string>
+    <string name="dialog_phone">New Phone</string>
+    <string name="dialog_affiliation">New Affiliation</string>
     <string name="dialog_old_password">Password (required)</string>
     <string name="dialog_new_password">New Password</string>
     <string name="dialog_new_password_conf">New Password Confirmation</string>
@@ -37,6 +38,7 @@
     <string name="name_image_grid">Photo Gallery</string>
     <string name="ac_name_image_pager">Image</string>
     <string name="countdown_label">Countdown</string>
+    <string name="grid_nothing_display">No connection.</string>
 
 
 

@@ -1,32 +1,26 @@
 package com.example.dan.ted.TED.common;
 
-import android.app.AlarmManager;
 import android.app.IntentService;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.text.format.DateUtils;
-import android.text.format.Time;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpResponseHandler;
-
-import org.apache.http.Header;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.dan.ted.TED.api.Api;
+import com.example.dan.ted.TED.api.RestClient;
+import com.example.dan.ted.TED.model.listModel;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 /**
  * Created by Dan on 7/16/2015.
  */
 public class HttpUpdateService extends IntentService {
-    String[] images;
-    private static final String imageURL = "http://10.0.3.2:5000/api/v1.0/img/";
+    static String[] images = new String[0];
+    private static final String imageURL = "http://10.0.3.2:5000/api/v1.0/photo_gallery/";
 
     public HttpUpdateService() {
         super(HttpUpdateService.class.getSimpleName());
@@ -34,6 +28,7 @@ public class HttpUpdateService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.e("tag", "Reached service");
         final String [] oldImages;
 
         if (intent.hasExtra("img_list"))
@@ -44,67 +39,58 @@ public class HttpUpdateService extends IntentService {
 
         session = new SessionManager(this);
         String token = (String)session.getUserDetails().get("token");
-        //TODO: For all toasts, to actually make them show you must implement Handler
-        UserRequest.getImgURL(token, new AsyncHttpResponseHandler() {
+
+        Api restClient = RestClient.createService(Api.class, token);
+        restClient.getList(new Callback<listModel>() {
             @Override
-            public void onSuccess(int i, Header[] headers, byte[] response) {
-                try {
-                    int oldImgLength;
-                    int newImgLength;
-                    if (oldImages != null)
-                        oldImgLength = oldImages.length;
-                    else oldImgLength = 0;
+            public void success(listModel list, Response response) {
+                int oldImgLength;
+                int newImgLength;
+                if (oldImages != null)
+                    oldImgLength = oldImages.length;
+                else oldImgLength = 0;
+                Log.e("tag", "Reached onSuccess");
 
-                    String str = new String(response);
-                    JSONObject obj = new JSONObject(str);
-                    JSONArray jsonImageList = new JSONArray(obj.getString("img_list"));
-                    images = new String[jsonImageList.length()];
-                    for (int c = 0; c < jsonImageList.length(); c++) {
-                        String image = jsonImageList.getString(c);
-                        try { images[c] = imageURL + URLEncoder.encode(image, "utf-8"); }
-                        catch(UnsupportedEncodingException e) {
-                            //This will never happen
-                        }
+                images = new String[list.getImgList().size()];
+                for (int c = 0; c < images.length; c++) {
+                    String image = list.getImgList().get(c);
+                    try {
+                        images[c] = imageURL + URLEncoder.encode(image, "utf-8").replace("+", "%20");
+                    } //replace pluses with %20 for space
+                    catch (UnsupportedEncodingException e) {
+                        Log.e("tag", "UnsupportedEncoding");
                     }
-                    newImgLength = images.length;
-
-                    if (oldImgLength != newImgLength) {//Give Photo_Sharing new images and set imgURLReady to true
-                        Intent intent = new Intent("img_list_new");
-                        intent.putExtra("img_list", images);
-                        sendBroadcast(intent);
-                        //TODO: Give the ImgListFragment the img list
-                        //TODO: Send new photo notification AND place notification in Notification fragment
-                    }
-                    else {//Img list stays on - no updates.
-                        Intent intent = new Intent("img_list_on");
-                        sendBroadcast(intent);
-                    }
-                } catch (JSONException e) {
-                    Toast.makeText(HttpUpdateService.this, "JSON Error 1: " + e.toString(), Toast.LENGTH_SHORT).show();
                 }
-                //imageURLReady = true;
+
+                newImgLength = images.length;
+                if (newImgLength == 0) {
+                    Intent intent = new Intent("img_list_off");
+                    sendBroadcast(intent);
+                }
+
+                if (oldImgLength < newImgLength) {//Give Photo_Sharing new image list and set imgURLReady to true
+                    Intent intent = new Intent("img_list_new");
+                    intent.putExtra("img_list", images);
+                    sendBroadcast(intent);
+                    //TODO: Give the ImgListFragment the img list
+                    //TODO: Send new photo notification AND place notification in Notification fragment
+                }
             }
 
             @Override
-            public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
-                try {
-                    String str = new String(response);
-                    JSONObject obj = new JSONObject(str);
-                    //if (oldImages == null) {  //We don't need to change anything
-                    //    Intent intent = new Intent("img_list_off");
-                    //    sendBroadcast(intent);
-                    //}
-                    Toast.makeText(HttpUpdateService.this, "Error: " + str, Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    Toast.makeText(HttpUpdateService.this, "JSON Error 2: " + e.toString(), Toast.LENGTH_SHORT).show();
-                }
+            public void failure(RetrofitError error) {
+                Intent intent = new Intent("img_list_off");
+                if (oldImages.length == 0)
+                    sendBroadcast(intent);
+                Log.e("tag", "failure " + error.getMessage());
             }
         });
-        scheduleNextUpdate();
     }
-
+/*
     private void scheduleNextUpdate() {
-        Intent intent = new Intent(this, this.getClass());
+        Intent intent = new Intent(getApplicationContext(), HttpUpdateService.class);
+        Log.e("tag", "Reached update scheduler");
+
         intent.putExtra("img_list", images);
         PendingIntent pendingIntent =
                 PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -112,50 +98,11 @@ public class HttpUpdateService extends IntentService {
         // TODO: Allow user to turn off auto update
 
         long currentTimeMillis = System.currentTimeMillis();
-        long nextUpdateTimeMillis = currentTimeMillis + 10 * DateUtils.SECOND_IN_MILLIS; //update once every 10 seconds
+        long nextUpdateTimeMillis = currentTimeMillis + (10 * DateUtils.SECOND_IN_MILLIS); //update once every 10 seconds
         Time nextUpdateTime = new Time();
         nextUpdateTime.set(nextUpdateTimeMillis);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC, nextUpdateTimeMillis, pendingIntent);
-    }
+    }*/
 }
-
-/*
-            @Override
-            public void onSuccess(int i, Header[] headers, byte[] response) {
-                try {
-                    String str = new String(response);
-                    JSONObject obj = new JSONObject(str);
-                    JSONArray jsonImageList = new JSONArray(obj.getString("img_list"));
-                    final String[] images = new String[jsonImageList.length()];
-                    for (int c = 0; c < jsonImageList.length(); c++) {
-                        String string = jsonImageList.getString(c);
-                        images[c] = string;
-                    }
-                    if (oldImages != null && oldImages.length != images.length) {
-                        //TODO: Tell the ImageGridFragment to refresh all images OR find a way to make them add/subtract only alternative images (maybe check if image in cache before calling its URL)
-                        //TODO: Send new photo notification AND place notification in Notification fragment
-                    }
-
-                } catch (JSONException e) {
-                    Toast.makeText(HttpUpdateService.this, "JSON Error 1: " + e.toString(), Toast.LENGTH_SHORT).show();
-                }
-                //imageURLReady = true;
-            }
-
-            @Override
-            public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
-                try {
-                    String str = new String(response);
-                    JSONObject obj = new JSONObject(str);
-                    //TODO: Show TextView (change visibilities) in Grid fragment
-                    Toast.makeText(HttpUpdateService.this, "Error: " + str, Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    Toast.makeText(HttpUpdateService.this, "JSON Error 2: " + e.toString(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        scheduleNextUpdate();
-    }
-    */

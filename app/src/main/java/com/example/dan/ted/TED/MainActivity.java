@@ -1,5 +1,7 @@
 package com.example.dan.ted.TED;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,16 +18,20 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.Constants;
+import com.example.dan.ted.TED.common.HttpUpdateService;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.SlidingTabLayout;
 import com.example.dan.ted.TED.common.UserRequest;
 
+import java.util.Calendar;
 import java.util.Locale;
 
 
@@ -60,31 +66,6 @@ public class MainActivity extends ActionBarActivity {
         String token = (String)session.getUserDetails().get("token");
         UserRequest.checkLogin(MainActivity.this, token);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("img_list_on");
-        filter.addAction("img_list_off");
-        filter.addAction("img_list_new");
-
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                switch(action) {
-                    case "img_list_on":
-                        imageGridStatus = "img_list_on";
-                        break;
-                    case "img_list_off":
-                        imageGridStatus = "img_list_off";
-                        break;
-                    case "img_list_new":
-                        imageGridStatus = "img_list_new";
-                        imgList = intent.getStringArrayExtra("img_list");
-                        break;
-                }
-            }
-        };
-        registerReceiver(broadcastReceiver, filter);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -105,6 +86,8 @@ public class MainActivity extends ActionBarActivity {
         //Give the SlidingTabLayout the ViewPager
         mSlidingTabLayout = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
         mSlidingTabLayout.setViewPager(mViewPager);
+
+        scheduleNextUpdate();
     }
 
     @Override
@@ -134,9 +117,6 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-   /* @Override
-    public void onFragmentInteraction(Uri uri) {
-    }*/
 
     public boolean getNetworkStatus() {
         ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -148,48 +128,24 @@ public class MainActivity extends ActionBarActivity {
         return networkConnected;
     }
 
-    public void resetBroadcastUpdate(String fragment) {
-        if (fragment.equals("img_grid")) {
-            imageGridStatus = "img_grid_on";
-        }
-    }
+    public void scheduleNextUpdate() {
+        Intent intent = new Intent(this, HttpUpdateService.class);
+        intent.putExtra("img_list", Photo_Sharing.images);
+        PendingIntent pendingIntent =
+                PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // TODO: Allow user to turn off auto update
 
-    public String[] getImgList() {
-        return imgList;
-    }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
 
-    public String getBroadcastUpdate(String fragment) {
-        if (fragment.equals("img_grid")) {
-            Log.e("tag", imageGridStatus);
-            return imageGridStatus;
-        }
-        else return "Nothing";
-    }
-/*
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            switch(action) {
-                case "img_list_on":
-                    imageGridStatus = "img_list_on";
-                    break;
-                case "img_list_off":
-                    imageGridStatus = "img_list_off";
-                    break;
-                case "img_list_new":
-                    Log.e("tag", "img_list_new set");
-                    imageGridStatus = "img_list_new";
-                    imgList = intent.getStringArrayExtra("img_list");
-                    break;
-            }
-        }
-    };
-*/
-    public void onNotificationsFragmentInteraction(String string){
+        long currentTimeMillis = System.currentTimeMillis();
+        long nextUpdateTimeMillis = currentTimeMillis + (10 * DateUtils.SECOND_IN_MILLIS); //update once every 10 seconds
+        Time nextUpdateTime = new Time();
+        nextUpdateTime.set(nextUpdateTimeMillis);
 
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), (10 * DateUtils.SECOND_IN_MILLIS), pendingIntent);
     }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -251,11 +207,5 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         moveTaskToBack(true);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unregisterReceiver(broadcastReceiver);
     }
 }

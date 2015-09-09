@@ -65,8 +65,7 @@ public class UserRequest {
             @Override
             public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
                 if (response != null) {
-                    String str = new String(response);
-                    Toast.makeText(context, "Wrong credentials: " + str, Toast.LENGTH_SHORT).show();
+                    toastResponse(response, context);
                 } else {
                     Toast.makeText(context, "Timed out.", Toast.LENGTH_SHORT).show();
                 }
@@ -137,8 +136,7 @@ public class UserRequest {
                     @Override
                     public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
                         if (response != null) {
-                            String str = new String(response);
-                            Toast.makeText(context, "Token expired. Please log in.", Toast.LENGTH_SHORT).show();
+                            toastResponse(response, context);
                         } else {
                             Toast.makeText(context, "Timed out.", Toast.LENGTH_SHORT).show();
                         }
@@ -163,11 +161,11 @@ public class UserRequest {
             @Override
             public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
                 if (response != null) {
-                    if (checkUnauthorizedReponse(throwable, context, token))
+                    if (checkUnauthorizedResponse(throwable, context, token)) {
                         Toast.makeText(context, "Token expired. Please log in.", Toast.LENGTH_SHORT).show();
-                    else {
-                        String str = new String(response);
-                        Toast.makeText(context, "Error: " + str, Toast.LENGTH_SHORT).show();
+                        session.logoutUser();
+                    } else {
+                        toastResponse(response, context);
                         session.logoutUser();
                     }
                 } else {
@@ -179,6 +177,7 @@ public class UserRequest {
     }
 
     public static void postImage(final Context context, final String capturedImagePath, final String photoPostURL, final String email, final String password) {
+        String URL = Constants.url + "user/photo";
         AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(email, password);
 
@@ -192,30 +191,16 @@ public class UserRequest {
             UserRequest.getToken(context, email, password);
         }
 
-        String URL = Constants.url + photoPostURL;
         client.post(context, URL, params,
                 new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] response) {
-                        try {
-                            String str = new String(response);
-                            JSONObject obj = new JSONObject(str);
-                        } catch (JSONException e) {
-                            Toast.makeText(context, "JSON Error 1: " + e.toString(), Toast.LENGTH_SHORT).show(); //Remove all JSON errors eventually
-                        }
                     }
 
                     @Override
                     public void onFailure(int i, Header[] headers, byte[] response, Throwable throwable) {
                         if (response != null) {
-                            try {
-                                String str = new String(response);
-                                JSONObject obj = new JSONObject(str);
-                                String message = obj.getString("message");
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                            } catch (Exception e) {
-                                Toast.makeText(context, "JSON Error 2: " + e.toString(), Toast.LENGTH_SHORT).show();
-                            }
+                            toastResponse(response, context);
                         } else {
                             Toast.makeText(context, "Photo upload timed out. Please try again later.", Toast.LENGTH_SHORT).show();
                         }
@@ -223,23 +208,34 @@ public class UserRequest {
                 });
     }
 
-    public static void getImgURL(final String token, AsyncHttpResponseHandler handler) {
-        if (token != null) { // This makes sure no program crash if user logs out in middle of request
+    public static void getImgURL(String token, AsyncHttpResponseHandler handler) {
+        if (!TextUtils.isEmpty(token)) { // This makes sure no program crash if user logs out in middle of request
             AsyncHttpClient client = new AsyncHttpClient();
             client.setBasicAuth(token, "");
-            String URL = Constants.url + "img_list";
+            String URL = Constants.url + "photo_gallery";
             client.get(URL, handler);
         }
     }
 
-    public static boolean checkUnauthorizedReponse(Throwable throwable, Context context, String token) {
+    public static boolean checkUnauthorizedResponse(Throwable throwable, Context context, String token) {
         HttpResponseException hre = (HttpResponseException) throwable;
         int statusCode = hre.getStatusCode();
-        if (statusCode == 409) {
+        if (statusCode == 401) {
             checkLogin(context, token);
             return true;
         }
         else return false;
+    }
+
+    public static void toastResponse(byte[] response, Context context) {
+        try {
+            String str = new String(response);
+            JSONObject obj = new JSONObject(str);
+            String message = obj.getString("message");
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(context, "JSON Error 2: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

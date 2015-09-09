@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.FragmentChangeInterface;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.UserRequest;
 import com.example.dan.ted.TED.common.Utility;
@@ -49,7 +50,7 @@ import java.util.HashMap;
  * Use the {@link mProfile#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class mProfile extends Fragment {
+public class mProfile extends Fragment implements FragmentChangeInterface{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -81,8 +82,10 @@ public class mProfile extends Fragment {
     SessionManager session;
     ViewGroup parent;
 
-    //private OnFragmentInteractionListener mListener;
-
+    @Override
+    public void fragmentBecameVisible() {
+        System.out.println("TestFragment");
+    }
     public static mProfile newInstance(String param1, String param2) {
         mProfile fragment = new mProfile();
         Bundle args = new Bundle();
@@ -158,6 +161,7 @@ public class mProfile extends Fragment {
         final EditText mDialogAffiliationView = (EditText) view.findViewById(R.id.dialog_affiliation);
         final EditText[] editFields = new EditText[] {mDialogPassword, mDialogNewPassword, mDialogNewPasswordConf,
                                                     mDialogEmailView, mDialogPhoneView, mDialogAffiliationView};
+
         mDialogPhotoView = (ImageView) view.findViewById(R.id.dialog_imageview_photo);
         mDialogPhotoTextView = (TextView) view.findViewById(R.id.dialog_photo);
         mDialogPhotoButton = (Button) view.findViewById(R.id.dialog_add_photo);
@@ -259,6 +263,7 @@ public class mProfile extends Fragment {
                                 focusView.requestFocus();
                             else
                                 UserRequest.put(context, oldPassword, newPassword, email, newEmail, newPhone, newAffiliation, mCapturedImagePath);
+
                         }
                     }
                 });
@@ -371,7 +376,7 @@ public class mProfile extends Fragment {
             }
             else
             {
-                textView.setText("Photo: " + getString(R.string.connection_error));
+                textView.setText("Photo: " + getString(R.string.none));
             }
         }
     }

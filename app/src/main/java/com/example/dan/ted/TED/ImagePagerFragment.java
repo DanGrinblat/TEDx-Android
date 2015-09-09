@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.Constants;
+import com.example.dan.ted.TED.common.SessionManager;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -44,6 +45,17 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 public class ImagePagerFragment extends Photo_Sharing {
 
 	public static final int INDEX = 2;
+	boolean imageURLReady = false;
+	Context context;
+	SessionManager session;
+	static String[] images = new String[0];
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		context = getActivity();
+		session = new SessionManager(context);
+	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,13 +103,10 @@ public class ImagePagerFragment extends Photo_Sharing {
 			View imageLayout = inflater.inflate(R.layout.item_pager_image, view, false);
 			assert imageLayout != null;
 			ImageView imageView = (ImageView) imageLayout.findViewById(R.id.image);
-			final ProgressBar spinner = (ProgressBar) imageLayout.findViewById(R.id.loading);
+			//final ProgressBar spinner = (ProgressBar) imageLayout.findViewById(R.id.loading);
 
 			ImageLoader.getInstance().displayImage(IMAGE_URLS[position], imageView, options, new SimpleImageLoadingListener() {
-				@Override
-				public void onLoadingStarted(String imageUri, View view) {
-					spinner.setVisibility(View.VISIBLE);
-				}
+
 
 				@Override
 				public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
@@ -120,16 +129,10 @@ public class ImagePagerFragment extends Photo_Sharing {
 							break;
 					}
 					Toast.makeText(view.getContext(), message, Toast.LENGTH_SHORT).show();
-
-					spinner.setVisibility(View.GONE);
 				}
 
-				@Override
-				public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-					spinner.setVisibility(View.GONE);
-				}
+
 			});
-
 			view.addView(imageLayout, 0);
 			return imageLayout;
 		}

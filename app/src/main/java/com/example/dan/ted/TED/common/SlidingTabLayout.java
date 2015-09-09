@@ -156,10 +156,22 @@ public class  SlidingTabLayout extends HorizontalScrollView {
      */
     public void setViewPager(ViewPager viewPager) {
         mTabStrip.removeAllViews();
-
         mViewPager = viewPager;
+        final PagerAdapter adapter = mViewPager.getAdapter();
+
         if (viewPager != null) {
-            viewPager.setOnPageChangeListener(new InternalViewPagerListener());
+            //viewPager.setOnPageChangeListener(new InternalViewPagerListener());
+            viewPager.setOnPageChangeListener(new InternalViewPagerListener() {
+
+                @Override
+                public void onPageSelected(final int position) {
+                    FragmentChangeInterface fragment = (FragmentChangeInterface) adapter.instantiateItem(mViewPager, position);
+                    if (fragment != null) {
+                        fragment.fragmentBecameVisible();
+                    }
+                }
+
+            });
             populateTabStrip();
         }
     }

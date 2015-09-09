@@ -1,11 +1,15 @@
 package com.example.dan.ted.TED;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.format.DateUtils;
+import android.text.format.Time;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,17 +42,15 @@ import java.util.Arrays;
  * create an instance of this fragment.
  */
 public abstract class Photo_Sharing extends Fragment {
-    boolean imageURLReady = false;
+    static boolean imageURLReady = false;
     Context context;
     SessionManager session;
-    static String[] images;
+    static String[] images = new String[0];
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getActivity();
         session = new SessionManager(context);
-        Intent intent = new Intent(context, HttpUpdateService.class);
-        context.startService(intent);
     }
 }

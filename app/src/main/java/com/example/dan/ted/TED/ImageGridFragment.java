@@ -106,7 +106,8 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
         rootView = inflater.inflate(R.layout.fragment_photo_sharing, container, false);
         listView = (GridView) rootView.findViewById(R.id.grid);
         imageAdapter = new ImageAdapter(getActivity(), images);
-            listView.setAdapter(imageAdapter);
+
+        ((GridView) listView).setAdapter(imageAdapter);
             listView.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -135,17 +136,30 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
         public int getCount() {
             return imgList.length;
         }
+        @Override
+        public Object getItem(int position) {
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final ViewHolder holder;
-            ImageView view;
 
-            //View view = convertView;
-            if (convertView == null)
-                convertView = inflater.inflate(R.layout.item_pager_image, parent, false);
+            View view = convertView;
+            if (view == null) {
+                view = inflater.inflate(R.layout.item_pager_image, parent, false);
                 //view = new ImageView(context);
-            Log.e("PICASSO", "Length: " + getCount());
+                holder = new ViewHolder();
+                holder.imageView = (ImageView) view.findViewById(R.id.image);
+                view.setTag(holder);
+            }
+            else
+                holder = (ViewHolder) view.getTag();
 
             Picasso.with(context).setDebugging(true);
             Picasso.with(context)
@@ -153,14 +167,13 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                     .fit()
                     .centerCrop()
                     .placeholder(R.drawable.ic_ted_loading)
-                    .into((ImageView) convertView);
-            return convertView;
+                    .into((ImageView) view);
+            return view;
         }
     }
 
     static class ViewHolder {
         ImageView imageView;
-        ProgressBar progressBar;
     }
 
     public void updateUI(boolean hasImages) {
@@ -174,7 +187,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
             imageAdapter = new ImageAdapter(getActivity(), imageConnectionLost);
         }
 
-        listView.setAdapter(imageAdapter);
+        ((GridView) listView).setAdapter(imageAdapter);
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -205,8 +218,4 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                 context.getResources().getResourceTypeName(resID) + '/' +
                 context.getResources().getResourceEntryName(resID));
     }
-
-
-
-
 }

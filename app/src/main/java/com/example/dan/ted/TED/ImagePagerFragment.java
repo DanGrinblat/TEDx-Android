@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +49,6 @@ public class ImagePagerFragment extends Photo_Sharing {
 	boolean imageURLReady = false;
 	Context context;
 	SessionManager session;
-	static String[] images = new String[0];
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -61,15 +61,12 @@ public class ImagePagerFragment extends Photo_Sharing {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fr_image_pager, container, false);
 		ViewPager pager = (ViewPager) rootView.findViewById(R.id.pager);
-		pager.setAdapter(new ImageAdapter(getActivity()));
+		pager.setAdapter(new ImagePagerFragment.ImageAdapter(getActivity()));
 		pager.setCurrentItem(getArguments().getInt(Constants.Extra.IMAGE_POSITION, 0));
 		return rootView;
 	}
 
 	private static class ImageAdapter extends PagerAdapter {
-
-		private static final String[] IMAGE_URLS = images;
-
 		private LayoutInflater inflater;
 		private DisplayImageOptions options;
 
@@ -95,17 +92,18 @@ public class ImagePagerFragment extends Photo_Sharing {
 
 		@Override
 		public int getCount() {
-			return IMAGE_URLS.length;
+			return images.length;
 		}
 
 		@Override
 		public Object instantiateItem(ViewGroup view, int position) {
+			Log.e("TAG", "instantiateItem");
 			View imageLayout = inflater.inflate(R.layout.item_pager_image, view, false);
 			assert imageLayout != null;
 			ImageView imageView = (ImageView) imageLayout.findViewById(R.id.image);
 			//final ProgressBar spinner = (ProgressBar) imageLayout.findViewById(R.id.loading);
 
-			ImageLoader.getInstance().displayImage(IMAGE_URLS[position], imageView, options, new SimpleImageLoadingListener() {
+			ImageLoader.getInstance().displayImage(images[position], imageView, options, new SimpleImageLoadingListener() {
 
 
 				@Override

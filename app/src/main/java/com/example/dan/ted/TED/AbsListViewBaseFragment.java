@@ -17,6 +17,7 @@ package com.example.dan.ted.TED;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.AbsListView;
 
 import com.example.dan.ted.TED.common.Constants;

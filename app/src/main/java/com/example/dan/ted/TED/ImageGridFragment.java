@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,16 +30,12 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.FragmentChangeInterface;
-import com.example.dan.ted.TED.common.HttpUpdateService;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
 
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
@@ -49,11 +44,10 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     View rootView;
 
     public static final int INDEX = 1;
-    static Context context;
-    public BroadcastReceiver broadcastReceiver;
-    private static String imageGridStatus;
+    private BroadcastReceiver broadcastReceiver;
     private IntentFilter intentFilter;
     private ImageAdapter imageAdapter;
+    private TextView textNoConnection;
 
     @Override
     public void fragmentBecameVisible() {
@@ -63,11 +57,8 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getActivity();
-        session = new SessionManager(context);
 
         intentFilter = new IntentFilter();
-        intentFilter.addAction("img_list_on");
         intentFilter.addAction("img_list_off");
         intentFilter.addAction("img_list_new");
 
@@ -76,29 +67,20 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 switch(action) {
-                    case "img_list_on":
-                        imageGridStatus = "img_list_on";
-                        break;
                     case "img_list_off":
-                        imageGridStatus = "img_list_off";
                         if (images.length == 0) {
                             imageURLReady = false;
                             updateUI(false);
                         }
                         break;
                     case "img_list_new":
-                        imageGridStatus = "img_list_new";
                         images = intent.getStringArrayExtra("img_list");
-                        Log.e("tag", Integer.toString(images.length));
                         imageURLReady = true;
                         updateUI(true);
                         break;
                 }
-                Log.e("tag", "Broadcast received");
             }
         };
-        //intent.putExtra("img_ready", imageURLReady);
-        //TODO: We need to use broadcastreceiver to get imgready status from httpupdate service and set the Photo_Sharing variable imgready accordingly
     }
 
     @Override
@@ -106,6 +88,10 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
         rootView = inflater.inflate(R.layout.fragment_photo_sharing, container, false);
         listView = (GridView) rootView.findViewById(R.id.grid);
         imageAdapter = new ImageAdapter(getActivity(), images);
+        textNoConnection = (TextView) rootView.findViewById(R.id.textViewNoPhoto);
+
+//        if (imageURLReady)
+//            textNoConnection.setVisibility(View.GONE);
 
         ((GridView) listView).setAdapter(imageAdapter);
             listView.setOnItemClickListener(new OnItemClickListener() {
@@ -114,7 +100,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                     if (imageURLReady)
                         startImagePagerActivity(position);
                 }
-            });
+        });
         return rootView;
     }
 
@@ -177,28 +163,24 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     }
 
     public void updateUI(boolean hasImages) {
-        Log.e("tag", "Fragment reached updateUI");
-
-        if (hasImages)
+        if (hasImages) {
+            if (textNoConnection.getVisibility() == View.VISIBLE)
+                textNoConnection.setVisibility(View.GONE);
             imageAdapter = new ImageAdapter(getActivity(), images);
-        else {
-            String[] imageConnectionLost = new String[1];
-            imageConnectionLost[0] = ResourceToUri(context, R.drawable.header1).toString();
-            imageAdapter = new ImageAdapter(getActivity(), imageConnectionLost);
+            ((GridView) listView).setAdapter(imageAdapter);
+            listView.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (imageURLReady)
+                        startImagePagerActivity(position);
+                }
+            });
         }
-
-        ((GridView) listView).setAdapter(imageAdapter);
-        listView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (imageURLReady)
-                    startImagePagerActivity(position);
-            }
-        });
-
-        imageGridStatus = "img_grid_on"; //resets status
-
-        //TODO: Optional - Find a way to have this check if the server connection failed. Probably broadcastreceiver from HttpUpdateService to MainActivity boolean, then this checks that boolean.
+        else
+            textNoConnection.setVisibility(View.VISIBLE);
+            //String[] imageConnectionLost = new String[1];
+            //imageConnectionLost[0] = ResourceToUri(context, R.drawable.header1).toString();
+            //imageAdapter = new ImageAdapter(getActivity(), imageConnectionLost);
     }
 
     @Override
@@ -210,12 +192,5 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     public void onDestroy() {
         super.onDestroy();
         getActivity().getApplicationContext().unregisterReceiver(broadcastReceiver);
-    }
-
-    public static Uri ResourceToUri (Context context, int resID) {
-        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
-                context.getResources().getResourcePackageName(resID) + '/' +
-                context.getResources().getResourceTypeName(resID) + '/' +
-                context.getResources().getResourceEntryName(resID));
     }
 }

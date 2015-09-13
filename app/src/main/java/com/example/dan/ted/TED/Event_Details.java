@@ -82,18 +82,9 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
         mMeetSpeakersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*Fragment newFragment = new ImageListFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(android.R.id.content, newFragment);
-
-                transaction.addToBackStack(null);
-                transaction.commit();
-*/
                 Intent intent = new Intent(getActivity(), ImageActivity.class);
                 intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImageListFragment.INDEX);
                 startActivity(intent);
-               // getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fr, tag).commit();
-
             }
         });
         return mainView;

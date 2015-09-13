@@ -5,12 +5,8 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,12 +16,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.text.format.Time;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.dan.ted.R;
-import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.HttpUpdateService;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.SlidingTabLayout;
@@ -130,7 +124,8 @@ public class MainActivity extends ActionBarActivity {
 
     public void scheduleNextUpdate() {
         Intent intent = new Intent(this, HttpUpdateService.class);
-        intent.putExtra("img_list", Photo_Sharing.images);
+        intent.putExtra("intent", "Photos");
+        intent.putExtra("img_list", BaseFragment.images);
         PendingIntent pendingIntent =
                 PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // TODO: Allow user to turn off auto update
@@ -164,7 +159,7 @@ public class MainActivity extends ActionBarActivity {
                     mProfile mProfile = new mProfile();
                     return mProfile;
                 case 1:
-                    Photo_Sharing photo_sharing = new ImageGridFragment();
+                    BaseFragment photo_sharing = new ImageGridFragment();
                     return photo_sharing;
                 case 2:
                     Event_Details event_details = new Event_Details();

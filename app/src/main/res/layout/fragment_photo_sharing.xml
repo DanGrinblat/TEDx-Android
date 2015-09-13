@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/grid"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center"
-    android:horizontalSpacing="4dip"
-    android:numColumns="3"
-    android:stretchMode="columnWidth"
-    android:verticalSpacing="4dip"
-    android:padding="4dip"
- />
-
-    <!-- <FrameLayout
+<FrameLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         xmlns:android="http://schemas.android.com/apk/res/android" >
-    -->
-    <!--
+
     <TextView
         android:id="@+id/textViewNoPhoto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/grid_nothing_display"
-        android:visibility="gone"
-        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginLeft="14dp"
     />
 
+    <GridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:horizontalSpacing="4dip"
+        android:numColumns="3"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="4dip"
+        android:padding="4dip"
+        />
 
-    </FrameLayout>
-    -->
+</FrameLayout>
+
 

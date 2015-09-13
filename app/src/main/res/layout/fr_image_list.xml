@@ -1,5 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@android:id/list"
+<FrameLayout
+	android:layout_height="match_parent"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent" />
+	xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<TextView
+		android:id="@+id/textViewNoSpeaker"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:text="@string/grid_nothing_display"
+        android:visibility="gone"
+		android:layout_marginTop="12dp"
+		android:layout_marginStart="14dp"
+		android:layout_marginLeft="14dp"
+    />
+
+	<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+
+</FrameLayout>

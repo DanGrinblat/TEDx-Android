@@ -10,5 +10,8 @@ import retrofit.http.GET;
  */
 public interface Api {
     @GET("/photo_gallery")
-    void getList(Callback<listModel> cb);
+    void getPhotoList(Callback<listModel> cb);
+
+    @GET("/event_details/speakers")
+    void getSpeakerList(Callback<listModel> cb);
 }

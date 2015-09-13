@@ -15,19 +15,16 @@
  *******************************************************************************/
 package com.example.dan.ted.TED;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
@@ -43,7 +40,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
-public class ImagePagerFragment extends Photo_Sharing {
+public class ImagePagerFragment extends BaseFragment {
 
 	public static final int INDEX = 2;
 	boolean imageURLReady = false;
@@ -97,7 +94,7 @@ public class ImagePagerFragment extends Photo_Sharing {
 
 		@Override
 		public Object instantiateItem(ViewGroup view, int position) {
-			Log.e("TAG", "instantiateItem");
+			//Log.e("TAG", "instantiateItem");
 			View imageLayout = inflater.inflate(R.layout.item_pager_image, view, false);
 			assert imageLayout != null;
 			ImageView imageView = (ImageView) imageLayout.findViewById(R.id.image);

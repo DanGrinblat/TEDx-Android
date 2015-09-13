@@ -15,9 +15,7 @@
  *******************************************************************************/
 package com.example.dan.ted.TED;
 
-import android.app.Fragment;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.AbsListView;
 
 import com.example.dan.ted.TED.common.Constants;
@@ -27,7 +25,7 @@ import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
-public abstract class AbsListViewBaseFragment extends Photo_Sharing {
+public abstract class AbsListViewBaseFragment extends BaseFragment {
 
 	protected static final String STATE_PAUSE_ON_SCROLL = "STATE_PAUSE_ON_SCROLL";
 	protected static final String STATE_PAUSE_ON_FLING = "STATE_PAUSE_ON_FLING";
@@ -44,7 +42,6 @@ public abstract class AbsListViewBaseFragment extends Photo_Sharing {
 	}
 
 	//This activates when you hit an image.
-    //TODO: Replace this with internal fragment switch
 	protected void startImagePagerActivity(int position) {
 		Intent intent = new Intent(getActivity(), ImageActivity.class);
 		intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImagePagerFragment.INDEX);

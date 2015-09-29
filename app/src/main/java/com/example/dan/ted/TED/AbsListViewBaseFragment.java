@@ -42,9 +42,9 @@ public abstract class AbsListViewBaseFragment extends BaseFragment {
 	}
 
 	//This activates when you hit an image.
-	protected void startImagePagerActivity(int position) {
+	protected void startImagePagerActivity(int position, int fragment) {
 		Intent intent = new Intent(getActivity(), ImageActivity.class);
-		intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImagePagerFragment.INDEX);
+		intent.putExtra(Constants.Extra.FRAGMENT_INDEX, fragment);
 		intent.putExtra(Constants.Extra.IMAGE_POSITION, position);
 		startActivity(intent);
 	}

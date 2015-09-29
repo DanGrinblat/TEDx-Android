@@ -39,6 +39,10 @@
     <string name="ac_name_image_pager">Image</string>
     <string name="countdown_label">Countdown</string>
     <string name="grid_nothing_display">No connection.</string>
+    <string name="countdown_completed">TEDxCSU is live!</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 

@@ -32,6 +32,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.HttpUpdateService;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
@@ -46,12 +47,13 @@ import java.util.List;
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
+//Meet the Speakers
 public class ImageListFragment extends AbsListViewBaseFragment {
 
 	public static final int INDEX = 0;
 	private static String[] list_images = new String[0];
-	private static String[] speakerNames = new String[0];
-	private static String[] speakerImages = new String[0];
+	public static String[] speakerNames = new String[0];
+	public static String[] speakerImages = new String[0];
 	private static boolean speakerURLReady = false;
 	private ImageAdapter imageAdapter;
 	private IntentFilter intentFilter;
@@ -109,7 +111,10 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				//startImagePagerActivity(position);
+				startImagePagerActivity(position, SpeakerFragment.INDEX);
+				//Intent intent = new Intent(getActivity(), ImageActivity.class);
+				//intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImageListFragment.INDEX);
+				//startActivity(intent);
 			}
 		});
 		if (speakerURLReady)
@@ -117,7 +122,7 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 		return rootView;
 	}
 
-	private static class ImageAdapter extends ArrayAdapter {
+	private static class ImageAdapter extends ArrayAdapter {//TODO: Set this.speakerBios, etc
 		private LayoutInflater inflater;
 		private Context context;
 		private ImageLoadingListener animateFirstListener = new AnimateFirstDisplayListener();

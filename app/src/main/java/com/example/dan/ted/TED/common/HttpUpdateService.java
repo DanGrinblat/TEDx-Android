@@ -6,13 +6,12 @@ import android.util.Log;
 
 import com.example.dan.ted.TED.api.Api;
 import com.example.dan.ted.TED.api.RestClient;
-import com.example.dan.ted.TED.model.listModel;
+import com.example.dan.ted.TED.model.ListModel;
 
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Arrays;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -30,6 +29,7 @@ public class HttpUpdateService extends IntentService {
     private static final String speakerURL = Constants.speakerURL;
 
     String token;
+    //TODO: This should retrieve speaker bios, tent, itinerary, etc.
 
     public HttpUpdateService() {
         super(HttpUpdateService.class.getSimpleName());
@@ -56,9 +56,9 @@ public class HttpUpdateService extends IntentService {
             oldImages = null;
 
         Api restClient = RestClient.createService(Api.class, token);
-        restClient.getPhotoList(new Callback<listModel>() {
+        restClient.getPhotoList(new Callback<ListModel>() {
             @Override
-            public void success(listModel list, Response response) {
+            public void success(ListModel list, Response response) {
                 int oldImgLength;
                 int newImgLength;
                 if (oldImages != null)
@@ -66,9 +66,9 @@ public class HttpUpdateService extends IntentService {
                 else oldImgLength = 0;
                 //Log.e("tag", "Reached onSuccess");
 
-                images = new String[list.getImgList().size()];
+                images = new String[list.getFileList().size()];
                 for (int c = 0; c < images.length; c++) {
-                    String name = list.getImgList().get(c);
+                    String name = list.getFileList().get(c);
                     try {
                         images[c] = imageURL + URLEncoder.encode(name, "utf-8").replace("+", "%20");
                     } //replace pluses with %20 for space
@@ -99,7 +99,7 @@ public class HttpUpdateService extends IntentService {
         });
     }
 
-    private void updateSpeakerList(Intent intent) {
+    private void updateSpeakerList(Intent intent) {  //TODO: Get speaker bios and arrange them with matching #s
         final String [] oldSpeakerList;
         if (intent.hasExtra("speaker_list"))
             oldSpeakerList = intent.getStringArrayExtra("speaker_list");
@@ -107,20 +107,19 @@ public class HttpUpdateService extends IntentService {
             oldSpeakerList = null;
 
         Api restClient = RestClient.createService(Api.class, token);
-        restClient.getSpeakerList(new Callback<listModel>() {
+        restClient.getSpeakerList(new Callback<ListModel>() {
             @Override
-            public void success(listModel list, Response response) {
+            public void success(ListModel list, Response response) {
                 int oldSpeakerLength;
                 int newSpeakerLength;
                 if (oldSpeakerList != null)
                     oldSpeakerLength = oldSpeakerList.length;
                 else oldSpeakerLength = 0;
-
-                int listSize = list.getImgList().size();
+                int listSize = list.getFileList().size();
                 speakerNames = new String[listSize];
                 speakerImages = new String[listSize];
                 for (int c = 0; c < listSize; c++) {
-                    String name = list.getImgList().get(c);
+                    String name = list.getFileList().get(c);
                     try {
                         speakerNames[c] =  FilenameUtils.removeExtension(name.replace("+", " ")); //replace pluses with space. NOTE: PNG FILES ONLY
                         speakerImages[c] = speakerURL + URLEncoder.encode(name, "utf-8").replace("+", "%20"); //replace pluses with %20 for space
@@ -150,25 +149,23 @@ public class HttpUpdateService extends IntentService {
             }
         });
     }
+
+    private void updateSpeakerBios(Intent intent) {
+        final String [] oldSpeakerBios;
+        if (intent.hasExtra("bios_list"))
+            oldSpeakerBios = intent.getStringArrayExtra("speaker_bios");
+        else
+            oldSpeakerBios = null;
+        Api restClient = RestClient.createService(Api.class, token);
+        restClient.getSpeakerList(new Callback<ListModel>() {
+            @Override
+            public void success(ListModel list, Response response) {
+
+            }
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+    }
 }
-
-
-/*
-    private void scheduleNextUpdate() {
-        Intent intent = new Intent(getApplicationContext(), HttpUpdateService.class);
-        Log.e("tag", "Reached update scheduler");
-
-        intent.putExtra("img_list", images);
-        PendingIntent pendingIntent =
-                PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        // TODO: Allow user to turn off auto update
-
-        long currentTimeMillis = System.currentTimeMillis();
-        long nextUpdateTimeMillis = currentTimeMillis + (10 * DateUtils.SECOND_IN_MILLIS); //update once every 10 seconds
-        Time nextUpdateTime = new Time();
-        nextUpdateTime.set(nextUpdateTimeMillis);
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC, nextUpdateTimeMillis, pendingIntent);
-    }*/

@@ -1,6 +1,9 @@
 package com.example.dan.ted.TED.api;
 
-import com.example.dan.ted.TED.model.listModel;
+import com.example.dan.ted.TED.model.ListModel;
+import com.example.dan.ted.TED.model.TimestampModel;
+
+import java.security.Timestamp;
 
 import retrofit.Callback;
 import retrofit.http.GET;
@@ -10,8 +13,11 @@ import retrofit.http.GET;
  */
 public interface Api {
     @GET("/photo_gallery")
-    void getPhotoList(Callback<listModel> cb);
+    void getPhotoList(Callback<ListModel> cb);
 
     @GET("/event_details/speakers")
-    void getSpeakerList(Callback<listModel> cb);
+    void getSpeakerList(Callback<ListModel> cb);
+
+    @GET("/countdown")
+    void getTimestamp(Callback<TimestampModel> cb);
 }

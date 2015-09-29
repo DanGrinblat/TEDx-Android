@@ -208,15 +208,6 @@ public class UserRequest {
                 });
     }
 
-    public static void getImgURL(String token, AsyncHttpResponseHandler handler) {
-        if (!TextUtils.isEmpty(token)) { // This makes sure no program crash if user logs out in middle of request
-            AsyncHttpClient client = new AsyncHttpClient();
-            client.setBasicAuth(token, "");
-            String URL = Constants.url + "photo_gallery";
-            client.get(URL, handler);
-        }
-    }
-
     public static boolean checkUnauthorizedResponse(Throwable throwable, Context context, String token) {
         HttpResponseException hre = (HttpResponseException) throwable;
         int statusCode = hre.getStatusCode();
@@ -267,5 +258,14 @@ public class UserRequest {
                 }
             }
         });
+    }
+
+    public static void getImgURL(String token, AsyncHttpResponseHandler handler) {
+        if (!TextUtils.isEmpty(token)) { // This makes sure no program crash if user logs out in middle of request
+            AsyncHttpClient client = new AsyncHttpClient();
+            client.setBasicAuth(token, "");
+            String URL = Constants.url + "photo_gallery";
+            client.get(URL, handler);
+        }
     }
 */

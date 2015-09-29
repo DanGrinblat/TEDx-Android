@@ -1,18 +1,37 @@
 package com.example.dan.ted.TED;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.api.Api;
+import com.example.dan.ted.TED.api.RestClient;
 import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.FragmentChangeInterface;
+import com.example.dan.ted.TED.common.SessionManager;
+import com.example.dan.ted.TED.model.ListModel;
+import com.example.dan.ted.TED.model.TimestampModel;
+
+import org.apache.commons.io.FilenameUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.concurrent.TimeUnit;
+
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -31,6 +50,11 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
 
     private View mainView;
     private Button mMeetSpeakersButton;
+    private Context context;
+    private long timestampLong;
+    private static CountDownTimer countdownTimer;
+    private TextView countdownTextView;
+    private TextView countdownLabel;
 
 
     // TODO: Rename and change types of parameters
@@ -64,9 +88,50 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
         // Required empty public constructor
     }
 
+    public void getTimestamp(String token) {
+        Api restClient = RestClient.createService(Api.class, token);
+        restClient.getTimestamp(new Callback<TimestampModel>() {
+            @Override
+            public void success(TimestampModel timestamp, Response response) {
+                timestampLong = Long.valueOf(timestamp.getTimestamp());
+                long currentTime = System.currentTimeMillis();
+
+                countdownTimer = new CountDownTimer(timestampLong-currentTime, 1000) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        String formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
+                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
+                        Log.e("tag", formattedCountdown);
+                        countdownTextView.setText(formattedCountdown);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        countdownTextView.setText(R.string.countdown_completed);
+                    }
+                }.start();
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.e("tag", "Timestamp failure: " + error.getMessage());
+            }
+        });
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        context = getActivity().getApplicationContext();
+        SessionManager session;
+        session = new SessionManager(context);
+        String token = (String) session.getUserDetails().get("token");
+
+        getTimestamp(token);
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -78,6 +143,8 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mainView = inflater.inflate(R.layout.fragment_event_details, container, false);
+        countdownTextView = (TextView) mainView.findViewById(R.id.countdown_timer);
+        countdownLabel = (TextView) mainView.findViewById(R.id.countdown_label);
         mMeetSpeakersButton = (Button) mainView.findViewById(R.id.button_meet_speakers);
         mMeetSpeakersButton.setOnClickListener(new View.OnClickListener() {
             @Override

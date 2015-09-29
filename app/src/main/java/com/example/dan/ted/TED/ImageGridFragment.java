@@ -40,6 +40,8 @@ import com.squareup.picasso.Picasso;
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
+
+//Photo Gallery
 public class ImageGridFragment extends AbsListViewBaseFragment implements FragmentChangeInterface{
     View rootView;
 
@@ -98,7 +100,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     if (imageURLReady)
-                        startImagePagerActivity(position);
+                        startImagePagerActivity(position, ImagePagerFragment.INDEX);
                 }
         });
         return rootView;
@@ -172,7 +174,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     if (imageURLReady)
-                        startImagePagerActivity(position);
+                        startImagePagerActivity(position, ImagePagerFragment.INDEX);
                 }
             });
         }

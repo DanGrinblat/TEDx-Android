@@ -8,28 +8,28 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class listModel {
+public class ListModel {
 
-    @SerializedName("img_list")
+    @SerializedName("file_list")
     @Expose
-    private List<String> imgList = new ArrayList<String>();
+    private List<String> fileList = new ArrayList<String>();
 
     /**
      *
      * @return
-     * The imgList
+     * The fileList
      */
-    public List<String> getImgList() {
-        return imgList;
+    public List<String> getFileList() {
+        return fileList;
     }
 
     /**
      *
-     * @param imgList
-     * The img_list
+     * @param fileList
+     * The file_list
      */
-    public void setImgList(List<String> imgList) {
-        this.imgList = imgList;
+    public void setFileList(List<String> fileList) {
+        this.fileList = fileList;
     }
 
 }

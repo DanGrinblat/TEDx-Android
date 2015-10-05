@@ -6,12 +6,15 @@ import android.util.Log;
 
 import com.example.dan.ted.TED.api.Api;
 import com.example.dan.ted.TED.api.RestClient;
+import com.example.dan.ted.TED.model.Bio;
 import com.example.dan.ted.TED.model.ListModel;
 
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -24,28 +27,35 @@ public class HttpUpdateService extends IntentService {
     private static String[] images = new String[0];
     private static String[] speakerNames = new String[0];
     private static String[] speakerImages = new String[0];
-
+    private static String[] speakerBios = new String[0];
+    private static String[] speakerBioNames = new String[0];
+    private static Api restClient;
+    static String token;
     private static final String imageURL = Constants.imageURL;
     private static final String speakerURL = Constants.speakerURL;
 
-    String token;
-    //TODO: This should retrieve speaker bios, tent, itinerary, etc.
+
+    //TODO: This should retrieve tent, itinerary, etc.
 
     public HttpUpdateService() {
         super(HttpUpdateService.class.getSimpleName());
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent intent) { //TODO: Handle token expiration
+        //TODO: Check if bios/names have been changed in terms of equivalency
         SessionManager session;
         session = new SessionManager(this);
         token = (String) session.getUserDetails().get("token");
+        restClient = RestClient.createService(Api.class, token);
 
         if (intent.hasExtra("intent"))
         if (intent.getStringExtra("intent").equals("Photos"))
             updatePhotoList(intent);
-        else if (intent.getStringExtra("intent").equals("Speakers"))
+        else if (intent.getStringExtra("intent").equals("Speakers")) {
             updateSpeakerList(intent);
+            updateSpeakerBios(intent);
+        }
     }
 
     private void updatePhotoList(Intent intent) {
@@ -55,7 +65,7 @@ public class HttpUpdateService extends IntentService {
         else
             oldImages = null;
 
-        Api restClient = RestClient.createService(Api.class, token);
+        //Api restClient = RestClient.createService(Api.class, token);
         restClient.getPhotoList(new Callback<ListModel>() {
             @Override
             public void success(ListModel list, Response response) {
@@ -99,14 +109,13 @@ public class HttpUpdateService extends IntentService {
         });
     }
 
-    private void updateSpeakerList(Intent intent) {  //TODO: Get speaker bios and arrange them with matching #s
+    private void updateSpeakerList(Intent intent) {
         final String [] oldSpeakerList;
         if (intent.hasExtra("speaker_list"))
             oldSpeakerList = intent.getStringArrayExtra("speaker_list");
         else
             oldSpeakerList = null;
 
-        Api restClient = RestClient.createService(Api.class, token);
         restClient.getSpeakerList(new Callback<ListModel>() {
             @Override
             public void success(ListModel list, Response response) {
@@ -151,20 +160,51 @@ public class HttpUpdateService extends IntentService {
     }
 
     private void updateSpeakerBios(Intent intent) {
-        final String [] oldSpeakerBios;
-        if (intent.hasExtra("bios_list"))
-            oldSpeakerBios = intent.getStringArrayExtra("speaker_bios");
+        final String [] oldBiosList;
+        if (intent.hasExtra("bio_list"))
+            oldBiosList = intent.getStringArrayExtra("bio_list");
         else
-            oldSpeakerBios = null;
-        Api restClient = RestClient.createService(Api.class, token);
-        restClient.getSpeakerList(new Callback<ListModel>() {
-            @Override
-            public void success(ListModel list, Response response) {
+            oldBiosList = null;
 
+        //Api restClient = RestClient.createService(Api.class, token);
+        restClient.getBioList(new Callback<Bio>() {
+            @Override
+            public void success(Bio list, Response response) {
+                int oldBiosLength;
+                int newBiosLength;
+                if (oldBiosList != null)
+                    oldBiosLength = oldBiosList.length;
+                else oldBiosLength = 0;
+                int listSize = list.getFileList().size();
+                speakerBioNames = new String[listSize];
+                speakerBios = new String[listSize];
+
+                for (int c = 0; c < listSize; c++) {
+                    String name = list.getFileList().get(c).getName();
+                    String bio = list.getFileList().get(c).getBio();
+                    speakerBioNames[c] = FilenameUtils.removeExtension(name.replace("+", " "));
+                    speakerBios[c] = bio.replaceAll("\u2019","'").replaceAll("\u201c","\"").replaceAll("\u201d", "\"");
+                    //Log.e("Element in speakerBios", speakerBios[c]);
+                }
+                newBiosLength = speakerBios.length;
+
+                if (newBiosLength == 0) {
+                    Intent intent = new Intent("bios_list_off");
+                    sendBroadcast(intent);
+                }
+                if (oldBiosLength != newBiosLength) {
+                    Intent intent = new Intent("bios_list_new");
+                    intent.putExtra("bios_names_list", speakerBioNames);
+                    intent.putExtra("bios_list", speakerBios);
+                    sendBroadcast(intent);
+                }
             }
+
             @Override
             public void failure(RetrofitError error) {
-
+                Intent intent = new Intent("bio_list_off");
+                sendBroadcast(intent);
+                Log.e("tag", "Bio List failure: " + error.getMessage());
             }
         });
     }

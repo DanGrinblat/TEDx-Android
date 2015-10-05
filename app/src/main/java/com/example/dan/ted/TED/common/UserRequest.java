@@ -146,11 +146,13 @@ public class UserRequest {
 
     public static void checkLogin(final Context context, final String token) {
         final SessionManager session = new SessionManager(context);
-        AsyncHttpClient client = new AsyncHttpClient();
+
         if (TextUtils.isEmpty(token)) {//No token in memory - first app launch
             session.logoutUser();
             return;
         }
+
+        AsyncHttpClient client = new AsyncHttpClient();
         client.setBasicAuth(token, "");
         String URL = Constants.url + "user";
         client.get(URL, new AsyncHttpResponseHandler() {
@@ -212,7 +214,7 @@ public class UserRequest {
         HttpResponseException hre = (HttpResponseException) throwable;
         int statusCode = hre.getStatusCode();
         if (statusCode == 401) {
-            checkLogin(context, token);
+            //checkLogin(context, token); Creates infinite loop in checkLogin
             return true;
         }
         else return false;

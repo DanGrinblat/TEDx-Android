@@ -102,7 +102,6 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
                         String formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                                 TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
                                 TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
-                        Log.e("tag", formattedCountdown);
                         countdownTextView.setText(formattedCountdown);
                     }
 

@@ -54,6 +54,8 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 	private static String[] list_images = new String[0];
 	public static String[] speakerNames = new String[0];
 	public static String[] speakerImages = new String[0];
+	public static String[] speakerBios = new String[0];
+	public static String[] speakerBiosNames = new String[0];
 	private static boolean speakerURLReady = false;
 	private ImageAdapter imageAdapter;
 	private IntentFilter intentFilter;
@@ -95,6 +97,7 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 		Intent intent = new Intent(getActivity().getApplicationContext(), HttpUpdateService.class);
 		intent.putExtra("intent", "Speakers");
 		intent.putExtra("speaker_list", speakerNames);
+		intent.putExtra("bio_list", speakerBios);
 		context.startService(intent);
 	}
 
@@ -111,14 +114,10 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 		listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				startImagePagerActivity(position, SpeakerFragment.INDEX);
-				//Intent intent = new Intent(getActivity(), ImageActivity.class);
-				//intent.putExtra(Constants.Extra.FRAGMENT_INDEX, ImageListFragment.INDEX);
-				//startActivity(intent);
+				if (speakerURLReady)
+					startImagePagerActivity(position, SpeakerFragment.INDEX);
 			}
 		});
-		if (speakerURLReady)
-			textNoConnection.setVisibility(View.GONE);
 		return rootView;
 	}
 
@@ -196,8 +195,8 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 			listView.setOnItemClickListener(new OnItemClickListener() {
 				@Override
 				public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-					//if (speakerURLReady)
-						//startImagePagerActivity(position);
+				if (speakerURLReady)
+					startImagePagerActivity(position, SpeakerFragment.INDEX);
 				}
 			});
 		}

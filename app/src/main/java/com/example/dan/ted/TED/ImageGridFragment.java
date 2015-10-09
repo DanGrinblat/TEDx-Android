@@ -22,6 +22,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +36,7 @@ import android.widget.TextView;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.FragmentChangeInterface;
+import com.example.dan.ted.TED.common.HttpUpdateService;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.squareup.picasso.Picasso;
 
@@ -73,6 +76,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                         if (images.length == 0) {
                             imageURLReady = false;
                             updateUI(false);
+                            startService();
                         }
                         break;
                     case "img_list_new":
@@ -83,6 +87,19 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                 }
             }
         };
+    }
+
+    public void startService() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(getActivity(), HttpUpdateService.class);
+                intent.putExtra("intent", "Photos");
+                getActivity().startService(intent);
+            }
+        };
+        Handler handler = new Handler();
+        handler.postDelayed(runnable, 10 * DateUtils.SECOND_IN_MILLIS);
     }
 
     @Override

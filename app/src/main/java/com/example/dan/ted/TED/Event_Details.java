@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,11 +53,12 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
     private View mainView;
     private Button mMeetSpeakersButton;
     private Context context;
-    private long timestampLong;
     private static CountDownTimer countdownTimer;
     private TextView countdownTextView;
     private TextView countdownLabel;
-
+    private SessionManager session;
+    private String formattedCountdown;
+    private Long currentTime;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -88,36 +91,49 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
         // Required empty public constructor
     }
 
-    public void getTimestamp(String token) {
+    public void getTimestamp(final String token) {
+    //Current behavior: Only send request if no timestamp in place. If request fails, retry in 10 sec
         Api restClient = RestClient.createService(Api.class, token);
+        currentTime = System.currentTimeMillis();
         restClient.getTimestamp(new Callback<TimestampModel>() {
             @Override
             public void success(TimestampModel timestamp, Response response) {
-                timestampLong = Long.valueOf(timestamp.getTimestamp());
-                long currentTime = System.currentTimeMillis();
-
-                countdownTimer = new CountDownTimer(timestampLong-currentTime, 1000) {
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        String formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
-                                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
-                        countdownTextView.setText(formattedCountdown);
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        countdownTextView.setText(R.string.countdown_completed);
-                    }
-                }.start();
-
+                Constants.timestampLong = Long.valueOf(timestamp.getTimestamp());
+                setTimer();
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("tag", "Timestamp failure: " + error.getMessage());
+                countdownTextView.setText(R.string.connection_error);
+                if (session.isLoggedIn()) {
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            getTimestamp(token);
+                        }
+                    };
+                    Handler handler = new Handler();
+                    handler.postDelayed(runnable, 10 * DateUtils.SECOND_IN_MILLIS);
+                }
             }
         });
+    }
+
+    public void setTimer() {
+        countdownTimer = new CountDownTimer(Constants.timestampLong - currentTime, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
+                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
+                countdownTextView.setText(formattedCountdown);
+            }
+
+            @Override
+            public void onFinish() {
+                countdownTextView.setText(R.string.countdown_completed);
+            }
+        }.start();
     }
 
     @Override
@@ -125,11 +141,12 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
         super.onCreate(savedInstanceState);
 
         context = getActivity().getApplicationContext();
-        SessionManager session;
         session = new SessionManager(context);
         String token = (String) session.getUserDetails().get("token");
 
-        getTimestamp(token);
+        if (Constants.timestampLong == null)
+            getTimestamp(token);
+        else setTimer();
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);

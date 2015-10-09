@@ -1,12 +1,18 @@
 package com.example.dan.ted.TED;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.FragmentChangeInterface;
@@ -25,6 +31,9 @@ public class More_Info extends Fragment implements FragmentChangeInterface{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private View mainView;
+    Button emailButton;
+    private EditText editText;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -63,13 +72,33 @@ public class More_Info extends Fragment implements FragmentChangeInterface{
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_more_info, container, false);
+        mainView = inflater.inflate(R.layout.fragment_more_info, container, false);
+        editText = (EditText) mainView.findViewById(R.id.more_info_edittext);
+        emailButton = (Button) mainView.findViewById(R.id.email_button);
+        emailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setType("message/rfc822");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"j.spiker49@csuohio.edu"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, R.string.email_subject);
+                intent.putExtra(Intent.EXTRA_TEXT, editText.getText());
+                try {
+                    startActivity(Intent.createChooser(intent, "Send email"));
+                }
+                catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(mainView.getContext(), "There are no email clients installed.",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        return mainView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

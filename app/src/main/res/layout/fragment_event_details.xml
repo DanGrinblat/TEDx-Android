@@ -7,15 +7,20 @@
     android:layout_height="wrap_content" android:orientation="vertical"
     android:layout_marginTop="10dp" android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp" android:layout_marginBottom="10dp">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/countdown_label" android:layout_gravity="center_horizontal"
-            android:id="@+id/countdown_label" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" android:textSize="14sp"
-            android:id="@+id/countdown_timer" />
+        <LinearLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:gravity="center"
+            android:layout_marginBottom="5dp">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/countdown_label" android:layout_gravity="center_horizontal"
+                android:id="@+id/countdown_label" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal" android:textSize="14sp"
+                android:id="@+id/countdown_timer" android:layout_marginLeft="3dp"
+                android:layout_marginStart="3dp"/>
+        </LinearLayout>
         <Button android:id="@+id/button_meet_speakers" style="?android:textAppearanceSmall"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:text="@string/title_meet_speakers"
+            android:text="@string/title_meet_speakers"
             android:textStyle="bold" />
         <Button android:id="@+id/button_learn_event" style="?android:textAppearanceSmall"
             android:layout_width="match_parent" android:layout_height="wrap_content"

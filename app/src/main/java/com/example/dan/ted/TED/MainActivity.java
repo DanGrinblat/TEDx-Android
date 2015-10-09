@@ -5,12 +5,14 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +20,8 @@ import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.example.dan.ted.R;
 import com.example.dan.ted.TED.common.HttpUpdateService;
@@ -64,10 +68,21 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         // Set up the toolbar
+        Drawable logo = ContextCompat.getDrawable(this, R.drawable.header3);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-        toolbar.setLogo(R.drawable.header2);
+        toolbar.setLogo(logo);
+        for (int i = 0; i < toolbar.getChildCount(); i++) {
+            View child = toolbar.getChildAt(i);
+            if (child != null)
+                if (child.getClass() == ImageView.class) {
+                    ImageView iv2 = (ImageView) child;
+                    if (iv2.getDrawable() == logo) {
+                        iv2.setAdjustViewBounds(true);
+                    }
+                }
+        }
 
         // Create the adapter that will return a fragment for each of the five
         // primary sections of the activity.
@@ -134,12 +149,12 @@ public class MainActivity extends ActionBarActivity {
         calendar.setTimeInMillis(System.currentTimeMillis());
 
         long currentTimeMillis = System.currentTimeMillis();
-        long nextUpdateTimeMillis = currentTimeMillis + (10 * DateUtils.SECOND_IN_MILLIS); //update once every 10 seconds
+        long nextUpdateTimeMillis = currentTimeMillis + (10 * DateUtils.MINUTE_IN_MILLIS); //update once every 10 seconds
         Time nextUpdateTime = new Time();
         nextUpdateTime.set(nextUpdateTimeMillis);
 
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), (10 * DateUtils.SECOND_IN_MILLIS), pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC, calendar.getTimeInMillis(), (10 * DateUtils.MINUTE_IN_MILLIS), pendingIntent);
     }
 
     /**

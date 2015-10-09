@@ -1,10 +1,31 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="com.example.dan.ted.TED.More_Info">
+<LinearLayout
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="12dp"
+    android:paddingLeft="14dp"
+    android:paddingStart="14dp"
+    android:paddingRight="14dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView android:layout_width="match_parent" android:layout_height="match_parent"
-        android:text="Hello More Info"
-        android:id="@+id/textView" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="@string/more_info_1"
+        android:id="@+id/text_view_message_1"
+        android:autoLink="web"
+        />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/more_info_2"
+        android:id="@+id/text_view_message_2" />
 
-</FrameLayout>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:minHeight="100dp" android:maxLength="450"
+        android:id="@+id/more_info_edittext"
+        android:inputType="textCapSentences|textMultiLine"
+        android:scrollHorizontally="false"/>
+
+    <Button android:layout_height="wrap_content" android:layout_width="wrap_content"
+        android:text="@string/email_button" android:id = "@+id/email_button"
+        style="?android:textAppearanceSmall" />
+
+</LinearLayout>

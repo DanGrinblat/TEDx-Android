@@ -49,12 +49,35 @@ public class HttpUpdateService extends IntentService {
         token = (String) session.getUserDetails().get("token");
         restClient = RestClient.createService(Api.class, token);
 
-        if (intent.hasExtra("intent"))
-        if (intent.getStringExtra("intent").equals("Photos"))
-            updatePhotoList(intent);
-        else if (intent.getStringExtra("intent").equals("Speakers")) {
-            updateSpeakerList(intent);
-            updateSpeakerBios(intent);
+
+        String stringIntent;
+        if (session.isLoggedIn()) {
+            if (intent.hasExtra("intent")) {
+                stringIntent = intent.getStringExtra("intent");
+
+                switch (stringIntent) {
+                    case "Photos":
+                        updatePhotoList(intent);
+                        break;
+                    case "Speakers":
+                        updateSpeakerList(intent);
+                        if (!intent.hasExtra("bio_list"))
+                            break;  //Intentional fallthrough if bio_list is available
+                    case "Bios":
+                        updateSpeakerBios(intent);
+                        break;
+                }
+        }
+          /*
+            if (intent.getStringExtra("intent").equals("Photos"))
+                updatePhotoList(intent);
+            else if (intent.getStringExtra("intent").equals("Speakers")) {
+                updateSpeakerList(intent);
+                if (intent.hasExtra("bio_list"))
+                    updateSpeakerBios(intent);
+            } else if (intent.getStringExtra("intent").equals("Bios"))
+                updateSpeakerBios(intent); */
+
         }
     }
 

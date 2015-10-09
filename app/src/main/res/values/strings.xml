@@ -37,10 +37,14 @@
     <string name="descr_image">Image</string>
     <string name="name_image_grid">Photo Gallery</string>
     <string name="ac_name_image_pager">Image</string>
-    <string name="countdown_label">Countdown</string>
+    <string name="countdown_label">Countdown:</string>
     <string name="grid_nothing_display">No connection.</string>
     <string name="countdown_completed">TEDxCSU is live!</string>
 
+    <string name="more_info_1">More information is available at <a>tedxclevelandstateuniversity.com/</a></string>
+    <string name="more_info_2">To contact us, please enter your message below:</string>
+    <string name="email_button">Open Email App</string>
+    <string name="email_subject">TedXCSU Inquiry</string>
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

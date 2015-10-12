@@ -51,11 +51,9 @@ import java.util.List;
 public class ImageListFragment extends AbsListViewBaseFragment {
 
 	public static final int INDEX = 0;
-	private static String[] list_images = new String[0];
 	public static String[] speakerNames = new String[0];
 	public static String[] speakerImages = new String[0];
 	public static String[] speakerBios = new String[0];
-	public static String[] speakerBiosNames = new String[0];
 	private static boolean speakerURLReady = false;
 	private ImageAdapter imageAdapter;
 	private IntentFilter intentFilter;
@@ -97,7 +95,7 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 		Intent intent = new Intent(getActivity().getApplicationContext(), HttpUpdateService.class);
 		intent.putExtra("intent", "Speakers");
 		intent.putExtra("speaker_list", speakerNames);
-		intent.putExtra("bio_list", speakerBios);
+		//intent.putExtra("bio_list", speakerBios);
 		context.startService(intent);
 	}
 
@@ -167,7 +165,6 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 
 			holder.text.setText(speakerNames[position]);
 
-			Picasso.with(context).setDebugging(true);
 			Picasso.with(context)
 					.load(speakerImages[position])
 					.fit()
@@ -207,13 +204,22 @@ public class ImageListFragment extends AbsListViewBaseFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		getActivity().getApplicationContext().registerReceiver(broadcastReceiver, intentFilter);
+		try {
+			getActivity().getApplicationContext().registerReceiver(broadcastReceiver, intentFilter);
+		} catch (IllegalArgumentException e) {
+			//
+		}
 	}
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		AnimateFirstDisplayListener.displayedImages.clear();
-		getActivity().getApplicationContext().unregisterReceiver(broadcastReceiver);
+		try {
+			AnimateFirstDisplayListener.displayedImages.clear();
+			getActivity().getApplicationContext().unregisterReceiver(broadcastReceiver);
+		} catch (IllegalArgumentException e) {
+			//
+		}
+
 	}
 
 		private static class AnimateFirstDisplayListener extends SimpleImageLoadingListener {

@@ -9,10 +9,10 @@ public class Constants {
 
         private Constants() {
         }
-        public static final String baseUrl = "http://10.0.3.2:5000/"; //https://tedxcsu.pythonanywhere.com/
-        public static final String url = baseUrl + "api/v1.0/";
-        public static final String imageURL = url + "photo_gallery/";
-        public static final String speakerURL = url + "event_details/speakers/";
+        public static final String baseUrl = "https://tedxcsu.pythonanywhere.com"; //https://tedxcsu.pythonanywhere.com/
+        public static final String url = baseUrl + "/api/v1.0/";
+        public static final String imageURL = url + "/photo_gallery/";
+        public static final String speakerURL = url + "/event_details/speakers/";
         public static Long timestampLong = null;
 
         public static class Config {

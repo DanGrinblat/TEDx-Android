@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.UserRequest;
 import com.loopj.android.http.AsyncHttpClient;
@@ -51,7 +52,7 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
      * Keep track of the login task to ensure we can cancel it if requested.
      */
    // private UserRequestTask mAuthTask = null;
-    private static final String url = "http://10.0.3.2:5000/api/v1.0/";
+    private static final String url = Constants.url;
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
@@ -84,6 +85,16 @@ public class LoginActivity extends ActionBarActivity implements LoaderCallbacks<
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attemptLogin();
+                    return true;
+                }
+                return false;
+            }
+        });
         populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);

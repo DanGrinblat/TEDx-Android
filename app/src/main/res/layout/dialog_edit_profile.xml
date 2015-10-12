@@ -37,14 +37,14 @@
         android:layout_marginLeft="5sp" android:layout_height="match_parent"
         android:hint="@string/profile_photo" />
 
-    <ImageView android:id="@+id/dialog_imageview_photo" android:layout_width="match_parent"
-        android:layout_marginTop="2sp"
+    <ImageView android:id="@+id/dialog_imageview_photo" android:layout_width="wrap_content"
+        android:layout_marginTop="4sp"
         android:layout_height="wrap_content" android:visibility="invisible"
         android:contentDescription="@string/register_content_description" />
 
     <Button android:id="@+id/dialog_add_photo" style="?android:textAppearanceSmall"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginTop="2dp" android:text="@string/dialog_add_photo"
+        android:layout_marginTop="3dp" android:text="@string/dialog_add_photo"
         android:textStyle="bold" />
 
     </LinearLayout>

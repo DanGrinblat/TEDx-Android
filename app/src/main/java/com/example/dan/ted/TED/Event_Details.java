@@ -59,6 +59,7 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
     private SessionManager session;
     private String formattedCountdown;
     private Long currentTime;
+    private Long timestampLong;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -98,7 +99,7 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
         restClient.getTimestamp(new Callback<TimestampModel>() {
             @Override
             public void success(TimestampModel timestamp, Response response) {
-                Constants.timestampLong = Long.valueOf(timestamp.getTimestamp());
+                timestampLong = Long.valueOf(timestamp.getTimestamp());
                 setTimer();
             }
 
@@ -120,18 +121,21 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
     }
 
     public void setTimer() {
-        countdownTimer = new CountDownTimer(Constants.timestampLong - currentTime, 1000) {
+        countdownTimer = new CountDownTimer(timestampLong - currentTime, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
-                        TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
-                        TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
-                countdownTextView.setText(formattedCountdown);
+                if (countdownTextView != null) {
+                    formattedCountdown = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
+                            TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
+                            TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
+                    countdownTextView.setText(formattedCountdown);
+                }
             }
 
             @Override
             public void onFinish() {
-                countdownTextView.setText(R.string.countdown_completed);
+                if (countdownTextView != null)
+                    countdownTextView.setText(R.string.countdown_completed);
             }
         }.start();
     }
@@ -142,11 +146,7 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
 
         context = getActivity().getApplicationContext();
         session = new SessionManager(context);
-        String token = (String) session.getUserDetails().get("token");
 
-        if (Constants.timestampLong == null)
-            getTimestamp(token);
-        else setTimer();
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -170,6 +170,13 @@ public class Event_Details extends Fragment implements FragmentChangeInterface{
                 startActivity(intent);
             }
         });
+        timestampLong = Constants.timestampLong;
+
+        String token = (String) session.getUserDetails().get("token");
+
+        if (timestampLong == null)
+            getTimestamp(token);
+        else setTimer();
         return mainView;
     }
 

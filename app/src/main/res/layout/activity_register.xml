@@ -40,18 +40,19 @@
 
             <EditText android:id="@+id/first_name" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:hint="@string/prompt_first_name"
-                android:maxLines="1" android:singleLine="true" />
+                android:maxLines="1" android:inputType="textCapSentences" android:singleLine="true" />
 
             <EditText android:id="@+id/last_name" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:hint="@string/prompt_last_name"
-                android:maxLines="1" android:singleLine="true" />
+                android:maxLines="1" android:inputType="textCapSentences" android:singleLine="true" />
 
             <TextView android:id="@+id/profile" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:text="@string/prompt_profile"
                 android:maxLines="1" android:singleLine="true" />
 
             <EditText android:id="@+id/affiliation" android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:hint="@string/prompt_affiliation" android:maxLines="1" android:singleLine="true" />
+                android:layout_height="wrap_content" android:inputType="textCapSentences"
+                android:hint="@string/prompt_affiliation" android:maxLines="1" android:singleLine="true" />
 
             <EditText android:id="@+id/phone" android:layout_width="match_parent"
                 android:layout_height="wrap_content" android:hint="@string/prompt_phone"
@@ -64,7 +65,7 @@
 
             <Button android:id="@+id/photo_button" style="?android:textAppearanceSmall"
                 android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:layout_marginTop="16dp" android:text="@string/register_add_photo"
+                android:layout_marginTop="16dp" android:layout_marginBottom="5dp" android:text="@string/register_add_photo"
                 android:textStyle="bold" />
 
             <Button android:id="@+id/email_register_button" style="?android:textAppearanceSmall"

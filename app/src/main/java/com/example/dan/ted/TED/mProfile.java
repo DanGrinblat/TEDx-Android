@@ -16,8 +16,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,10 +32,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.FragmentChangeInterface;
 import com.example.dan.ted.TED.common.SessionManager;
 import com.example.dan.ted.TED.common.UserRequest;
 import com.example.dan.ted.TED.common.Utility;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.InputStream;
@@ -50,12 +56,12 @@ import java.util.HashMap;
  * Use the {@link mProfile#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class mProfile extends Fragment implements FragmentChangeInterface{
+public class mProfile extends Fragment implements FragmentChangeInterface {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String IMAGE_EXTENSION = ".jpg";
-    private static final String url = "http://10.0.3.2:5000/api/v1.0/";
+    private static final String url = Constants.url;
     private static final int CAMERA_REQUEST = 1337;
 
     private Uri outputFileUri;
@@ -86,6 +92,7 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
     public void fragmentBecameVisible() {
         System.out.println("TestFragment");
     }
+
     public static mProfile newInstance(String param1, String param2) {
         mProfile fragment = new mProfile();
         Bundle args = new Bundle();
@@ -95,7 +102,8 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
         return fragment;
     }
 
-    public mProfile() { }
+    public mProfile() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -134,20 +142,32 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
 
     public void populateViews() {
         HashMap<String, Object> user = session.getUserDetails();
-        String name = (String)user.get(SessionManager.KEY_NAME);
-        email = (String)user.get(SessionManager.KEY_EMAIL);
-        String phone = (String)user.get(SessionManager.KEY_PHONE);
-        String affiliation = (String)user.get(SessionManager.KEY_AFFILIATION);
-        photoURL = (String)user.get(SessionManager.KEY_PHOTO_URL);
+        String name = (String) user.get(SessionManager.KEY_NAME);
+        email = (String) user.get(SessionManager.KEY_EMAIL);
+        String phone = (String) user.get(SessionManager.KEY_PHONE);
+        String affiliation = (String) user.get(SessionManager.KEY_AFFILIATION);
         mNameView.setText(getString(R.string.profile_hello) + " " + name);
         mEmailView.setText(getString(R.string.profile_email) + " " + email);
         mPhoneView.setText(getString(R.string.profile_phone) + " " + phone);
         mAffiliationView.setText(getString(R.string.profile_affiliation) + " " + affiliation);
 
-        if (!TextUtils.isEmpty(photoURL))
-            new TestPhotoURL(context, mPhotoImageView, mPhotoView, R.id.profile_imageview_photo, mainView).execute(photoURL);
-        else
-            mPhotoView.setText(getString(R.string.profile_no_photo));
+        if (!(TextUtils.isEmpty((String)user.get(SessionManager.KEY_PHOTO_URL)))) {
+            photoURL = Constants.baseUrl + (String) user.get(SessionManager.KEY_PHOTO_URL);
+            Log.e("tag", photoURL);
+            Picasso.with(context)
+                    .load(photoURL)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    //.fit()
+                    //.centerCrop()
+                    .resize(800,800)
+                    .centerInside()
+                    .placeholder(R.drawable.ic_ted_loading)
+                    .into(mPhotoImageView);
+            mPhotoImageView.setVisibility(View.VISIBLE);
+            mPhotoView.setText(getString(R.string.profile_photo));
+        } else
+            mPhotoView.setText(R.string.profile_no_photo);
     }
 
     public void onEditButtonPressed() {
@@ -159,8 +179,8 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
         final EditText mDialogEmailView = (EditText) view.findViewById(R.id.dialog_email);
         final EditText mDialogPhoneView = (EditText) view.findViewById(R.id.dialog_phone);
         final EditText mDialogAffiliationView = (EditText) view.findViewById(R.id.dialog_affiliation);
-        final EditText[] editFields = new EditText[] {mDialogPassword, mDialogNewPassword, mDialogNewPasswordConf,
-                                                    mDialogEmailView, mDialogPhoneView, mDialogAffiliationView};
+        final EditText[] editFields = new EditText[]{mDialogPassword, mDialogNewPassword, mDialogNewPasswordConf,
+                mDialogEmailView, mDialogPhoneView, mDialogAffiliationView};
 
         mDialogPhotoView = (ImageView) view.findViewById(R.id.dialog_imageview_photo);
         mDialogPhotoTextView = (TextView) view.findViewById(R.id.dialog_photo);
@@ -171,7 +191,7 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 if (cameraIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                     File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                            + "/TEDxCLE");
+                            + "/TEDxCSU");
                     if (!folder.exists())
                         folder.mkdirs();
                     File image_file = new File(folder.toString(), "thumbnail.jpg");
@@ -183,9 +203,22 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
             }
         });
 
-        new TestPhotoURL(context, mDialogPhotoView, mDialogPhotoTextView, R.id.dialog_imageview_photo, view).execute(photoURL);
-        if (mDialogPhotoView.getVisibility() == View.VISIBLE) //TestPhotoURL sets ImageView to visible if URL works
+        if (!TextUtils.isEmpty(photoURL)) {
             mDialogPhotoButton.setText(getString(R.string.register_change_photo));
+            Picasso.with(context)
+                    .load(photoURL)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .networkPolicy(NetworkPolicy.NO_CACHE)
+                    //.fit()
+                    //.centerCrop()
+                    .resize(800,800)
+                    .centerInside()
+                    .placeholder(R.drawable.ic_ted_loading)
+                    .into(mDialogPhotoView);
+            mDialogPhotoView.setVisibility(View.VISIBLE);
+            mDialogPhotoTextView.setText(R.string.profile_photo);
+        }
+
 
         alertDialog =
                 new AlertDialog.Builder(context)
@@ -261,9 +294,25 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
                         } else {
                             if (cancel)
                                 focusView.requestFocus();
-                            else
+                            else {
                                 UserRequest.put(context, oldPassword, newPassword, email, newEmail, newPhone, newAffiliation, mCapturedImagePath);
-
+                                /*Picasso.with(context)
+                                        .load(photoURL)
+                                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                        .networkPolicy(NetworkPolicy.NO_CACHE)
+                                        .fit()
+                                        .centerCrop()
+                                        .placeholder(R.drawable.ic_ted_loading)
+                                        .into(mPhotoImageView);
+                                Picasso.with(context)
+                                        .load(photoURL)
+                                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                        .networkPolicy(NetworkPolicy.NO_CACHE)
+                                        .fit()
+                                        .centerCrop()
+                                        .placeholder(R.drawable.ic_ted_loading)
+                                        .into(mDialogPhotoView);*/
+                            }
                         }
                     }
                 });
@@ -273,10 +322,10 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
         alertDialog.show();
     }
 
-    private boolean allEmpty(EditText[] fields){
-        for(int i = 0; i < fields.length; i++){
+    private boolean allEmpty(EditText[] fields) {
+        for (int i = 0; i < fields.length; i++) {
             EditText currentField = fields[i];
-            if(!TextUtils.isEmpty(currentField.getText().toString()))
+            if (!TextUtils.isEmpty(currentField.getText().toString()))
                 return false;
         }
         return true;
@@ -289,11 +338,9 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
             mDialogPhotoView.setImageURI(Uri.fromFile(file));
             mDialogPhotoView.setVisibility(View.VISIBLE);
             mDialogPhotoButton.setText(getString(R.string.register_change_photo));
-            mDialogPhotoTextView.setVisibility(View.GONE);
             newPhoto = true;
-        }
-        else {
-            Toast.makeText(context, "Camera error: " + resultCode, Toast.LENGTH_SHORT).show();
+        } else {
+            //Toast.makeText(context, "Camera error: " + resultCode, Toast.LENGTH_SHORT).show();
             mCapturedImagePath = null;
         }
     }
@@ -307,19 +354,13 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-    /*    try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }*/
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-       // mListener = null;
     }
+}
 
     /**
      * This interface must be implemented by activities that contain this
@@ -335,73 +376,3 @@ public class mProfile extends Fragment implements FragmentChangeInterface{
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
     }*/
-    private class TestPhotoURL extends AsyncTask<String, Void, Boolean> {
-        private Context context;
-        private ImageView imageView;
-        private TextView textView;
-        private int id;
-        private View view;
-
-        public TestPhotoURL(Context context, ImageView imageView, TextView textView, int id, View view) {
-            this.context = context;
-            this.imageView = imageView;
-            this.textView = textView;
-            this.view = view;
-            this.id = id;
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-            try {
-                HttpURLConnection.setFollowRedirects(false);
-                HttpURLConnection con = (HttpURLConnection) new URL(params[0]).openConnection();
-                con.setRequestMethod("HEAD");
-                System.out.println(con.getResponseCode());
-                return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            boolean bResponse = result;
-            if (bResponse)
-            {
-                new DownloadImageTask((ImageView) view.findViewById(id)).execute(photoURL);
-                imageView.setVisibility(View.VISIBLE);
-                textView.setText(getString(R.string.register_change_photo));
-            }
-            else
-            {
-                textView.setText("Photo: " + getString(R.string.none));
-            }
-        }
-    }
-
-    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
-        }
-    }
-}

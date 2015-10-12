@@ -62,7 +62,47 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setBroadcastReceiver();
+    }
 
+    public void startService() {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(getActivity(), HttpUpdateService.class);
+                intent.putExtra("intent", "Photos");
+                getActivity().startService(intent);
+            }
+        };
+        Handler handler = new Handler();
+        handler.postDelayed(runnable, 10 * DateUtils.SECOND_IN_MILLIS);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.fragment_photo_sharing, container, false);
+        listView = (GridView) rootView.findViewById(R.id.grid);
+        imageAdapter = new ImageAdapter(getActivity(), images);
+        textNoConnection = (TextView) rootView.findViewById(R.id.textViewNoPhoto);
+
+        ((GridView) listView).setAdapter(imageAdapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (imageURLReady)
+                    startImagePagerActivity(position, ImagePagerFragment.INDEX);
+            }
+            });
+
+        if (images.length != 0)
+            textNoConnection.setVisibility(View.GONE);
+
+
+
+        return rootView;
+    }
+
+    private void setBroadcastReceiver() {
         intentFilter = new IntentFilter();
         intentFilter.addAction("img_list_off");
         intentFilter.addAction("img_list_new");
@@ -87,40 +127,6 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
                 }
             }
         };
-    }
-
-    public void startService() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(getActivity(), HttpUpdateService.class);
-                intent.putExtra("intent", "Photos");
-                getActivity().startService(intent);
-            }
-        };
-        Handler handler = new Handler();
-        handler.postDelayed(runnable, 10 * DateUtils.SECOND_IN_MILLIS);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_photo_sharing, container, false);
-        listView = (GridView) rootView.findViewById(R.id.grid);
-        imageAdapter = new ImageAdapter(getActivity(), images);
-        textNoConnection = (TextView) rootView.findViewById(R.id.textViewNoPhoto);
-
-//        if (imageURLReady)
-//            textNoConnection.setVisibility(View.GONE);
-
-        ((GridView) listView).setAdapter(imageAdapter);
-            listView.setOnItemClickListener(new OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (imageURLReady)
-                        startImagePagerActivity(position, ImagePagerFragment.INDEX);
-                }
-        });
-        return rootView;
     }
 
     private static class ImageAdapter extends ArrayAdapter {
@@ -166,7 +172,6 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
             else
                 holder = (ViewHolder) view.getTag();
 
-            Picasso.with(context).setDebugging(true);
             Picasso.with(context)
                     .load(imgList[position])
                     .fit()
@@ -183,8 +188,7 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
 
     public void updateUI(boolean hasImages) {
         if (hasImages) {
-            if (textNoConnection.getVisibility() == View.VISIBLE)
-                textNoConnection.setVisibility(View.GONE);
+            textNoConnection.setVisibility(View.GONE);
             imageAdapter = new ImageAdapter(getActivity(), images);
             ((GridView) listView).setAdapter(imageAdapter);
             listView.setOnItemClickListener(new OnItemClickListener() {
@@ -205,11 +209,19 @@ public class ImageGridFragment extends AbsListViewBaseFragment implements Fragme
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().getApplicationContext().registerReceiver(broadcastReceiver, intentFilter);
+        try {
+            getActivity().getApplicationContext().registerReceiver(broadcastReceiver, intentFilter);
+        } catch (IllegalArgumentException e) {
+            //
+        }
     }
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getActivity().getApplicationContext().unregisterReceiver(broadcastReceiver);
+        try {
+            getActivity().getApplicationContext().unregisterReceiver(broadcastReceiver);
+        } catch (IllegalArgumentException e) {
+            //
+        }
     }
 }

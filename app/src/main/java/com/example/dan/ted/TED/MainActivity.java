@@ -137,10 +137,11 @@ public class MainActivity extends ActionBarActivity {
         return networkConnected;
     }
 
-    public void scheduleNextUpdate() {
+    public void scheduleNextUpdate() { //Tries request once. If the request fails, retry every 10 seconds. Else, retry every 10 minutes.
         Intent intent = new Intent(this, HttpUpdateService.class);
         intent.putExtra("intent", "Photos");
         intent.putExtra("img_list", BaseFragment.images);
+        startService(intent);
         PendingIntent pendingIntent =
                 PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         // TODO: Allow user to turn off auto update

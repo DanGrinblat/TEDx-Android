@@ -14,6 +14,9 @@ import org.apache.commons.io.FilenameUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import retrofit.Callback;
@@ -51,10 +54,9 @@ public class HttpUpdateService extends IntentService {
 
 
         String stringIntent;
-        if (session.isLoggedIn()) {
-            if (intent.hasExtra("intent")) {
-                stringIntent = intent.getStringExtra("intent");
-
+        if (intent.hasExtra("intent")) {
+            stringIntent = intent.getStringExtra("intent");
+            if (session.isLoggedIn()) {
                 switch (stringIntent) {
                     case "Photos":
                         updatePhotoList(intent);
@@ -67,17 +69,24 @@ public class HttpUpdateService extends IntentService {
                         updateSpeakerBios(intent);
                         break;
                 }
-        }
-          /*
-            if (intent.getStringExtra("intent").equals("Photos"))
-                updatePhotoList(intent);
-            else if (intent.getStringExtra("intent").equals("Speakers")) {
-                updateSpeakerList(intent);
-                if (intent.hasExtra("bio_list"))
-                    updateSpeakerBios(intent);
-            } else if (intent.getStringExtra("intent").equals("Bios"))
-                updateSpeakerBios(intent); */
-
+            }
+            else {
+                Intent broadcastIntent;
+                switch (stringIntent) {
+                    case "Photos":
+                        broadcastIntent = new Intent("img_list_off");
+                        sendBroadcast(broadcastIntent);
+                        break;
+                    case "Speakers":
+                        broadcastIntent = new Intent("speaker_list_off");
+                        sendBroadcast(broadcastIntent);
+                        break;
+                    case "Bios":
+                        broadcastIntent = new Intent("bios_list_off");
+                        sendBroadcast(broadcastIntent);
+                        break;
+                }
+            }
         }
     }
 
@@ -159,6 +168,11 @@ public class HttpUpdateService extends IntentService {
                         Log.e("tag", "UnsupportedEncoding");
                     }
                 }
+
+                Arrays.sort(speakerNames, new StringComparator());
+                Arrays.sort(speakerImages, new URLComparator());
+
+
                 newSpeakerLength = speakerNames.length;
 
                 if (newSpeakerLength == 0) {
@@ -199,6 +213,9 @@ public class HttpUpdateService extends IntentService {
                     oldBiosLength = oldBiosList.length;
                 else oldBiosLength = 0;
                 int listSize = list.getFileList().size();
+
+                HashMap<String, String> speakerBios1 = new HashMap<String, String>(listSize);
+
                 speakerBioNames = new String[listSize];
                 speakerBios = new String[listSize];
 
@@ -207,18 +224,22 @@ public class HttpUpdateService extends IntentService {
                     String bio = list.getFileList().get(c).getBio();
                     speakerBioNames[c] = FilenameUtils.removeExtension(name.replace("+", " "));
                     speakerBios[c] = bio.replaceAll("\u2019","'").replaceAll("\u201c","\"").replaceAll("\u201d", "\"");
-                    //Log.e("Element in speakerBios", speakerBios[c]);
+                    speakerBios1.put(speakerBioNames[c], speakerBios[c]);
                 }
-                newBiosLength = speakerBios.length;
+
+                Arrays.sort(speakerBioNames, new StringComparator());
+
+                newBiosLength = speakerBios1.size();
 
                 if (newBiosLength == 0) {
-                    Intent intent = new Intent("bios_list_off");
+                    Intent intent = new Intent("bio_list_off");
                     sendBroadcast(intent);
                 }
                 if (oldBiosLength != newBiosLength) {
-                    Intent intent = new Intent("bios_list_new");
-                    intent.putExtra("bios_names_list", speakerBioNames);
-                    intent.putExtra("bios_list", speakerBios);
+                    Intent intent = new Intent("bio_list_new");
+                    intent.putExtra("bio_name_list", speakerBioNames);
+                    //intent.putExtra("bio_list", speakerBios);
+                    intent.putExtra("bio_list", speakerBios1);
                     sendBroadcast(intent);
                 }
             }
@@ -230,5 +251,16 @@ public class HttpUpdateService extends IntentService {
                 Log.e("tag", "Bio List failure: " + error.getMessage());
             }
         });
+    }
+
+    public class StringComparator implements Comparator<String> {
+        public int compare(String b1, String b2) {
+            return b1.substring(b1.lastIndexOf(" ")+1).compareTo(b2.substring(b2.lastIndexOf(" ")+1));
+        }
+    }
+    public class URLComparator implements Comparator<String> {
+        public int compare(String b1, String b2) {
+            return b1.substring(b1.lastIndexOf("%20")+3).compareTo(b2.substring(b2.lastIndexOf("%20")+3));
+        }
     }
 }

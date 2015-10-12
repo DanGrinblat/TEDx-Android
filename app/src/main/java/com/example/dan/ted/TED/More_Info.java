@@ -84,18 +84,13 @@ public class More_Info extends Fragment implements FragmentChangeInterface{
         emailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setType("message/rfc822");
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"j.spiker49@csuohio.edu"});
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("plain/text");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[] {"j.spiker49@csuohio.edu"});
                 intent.putExtra(Intent.EXTRA_SUBJECT, R.string.email_subject);
                 intent.putExtra(Intent.EXTRA_TEXT, editText.getText());
-                try {
-                    startActivity(Intent.createChooser(intent, "Send email"));
-                }
-                catch (android.content.ActivityNotFoundException ex) {
-                    Toast.makeText(mainView.getContext(), "There are no email clients installed.",
-                            Toast.LENGTH_SHORT).show();
-                }
+                startActivity(Intent.createChooser(intent, ""));
+
             }
         });
         return mainView;

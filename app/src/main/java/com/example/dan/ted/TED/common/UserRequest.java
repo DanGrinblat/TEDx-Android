@@ -122,7 +122,7 @@ public class UserRequest {
                                     postImage(context, capturedImagePath, photoPostURL, email, newPassword);
                                 else
                                     postImage(context, capturedImagePath, photoPostURL, email, oldPassword);
-                            }
+                            } else
                             if (newPasswordGiven)
                                 getToken(context, email, newPassword);
                             else getToken(context, email, oldPassword);
@@ -197,6 +197,7 @@ public class UserRequest {
                 new AsyncHttpResponseHandler() {
                     @Override
                     public void onSuccess(int i, Header[] headers, byte[] response) {
+                        UserRequest.getToken(context, email, password);
                     }
 
                     @Override
@@ -206,6 +207,7 @@ public class UserRequest {
                         } else {
                             Toast.makeText(context, "Photo upload timed out. Please try again later.", Toast.LENGTH_SHORT).show();
                         }
+                        UserRequest.getToken(context, email, password);
                     }
                 });
     }

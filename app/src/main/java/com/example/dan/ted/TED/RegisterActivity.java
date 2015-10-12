@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.dan.ted.R;
+import com.example.dan.ted.TED.common.Constants;
 import com.example.dan.ted.TED.common.UserRequest;
 import com.example.dan.ted.TED.common.Utility;
 import com.loopj.android.http.AsyncHttpClient;
@@ -52,7 +53,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
     // private UserRegisterTask mAuthTask = null;
 
     private static final int CAMERA_REQUEST = 1337;
-    private static final String url = "http://10.0.3.2:5000/api/v1.0/";
+    private static final String url = Constants.url;
     private EditText mEmailView;
     private EditText mPasswordView;
     private EditText mPasswordConfirmationView;
@@ -127,7 +128,7 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
                     File folder = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
-                            + "/TEDxCLE");
+                            + "/TEDxCSU");
                     if (!folder.exists())
                         folder.mkdirs();
                     File image_file = new File(folder.toString(), "thumbnail.jpg");
@@ -365,12 +366,12 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
         client.setBasicAuth("yxsn4kHuZq-936ZM", "YqArG33c-BF4t6xL");
         JSONObject jsonParams = new JSONObject();
         try {
-            jsonParams.put("email", email);
-            jsonParams.put("password", password);
-            jsonParams.put("first_name", firstName);
-            jsonParams.put("last_name", lastName);
-            jsonParams.put("phone", phone);
-            jsonParams.put("affiliation", affiliation);
+            jsonParams.put("email", email.trim());
+            jsonParams.put("password", password.trim());
+            jsonParams.put("first_name", firstName.trim());
+            jsonParams.put("last_name", lastName.trim());
+            jsonParams.put("phone", phone.trim());
+            jsonParams.put("affiliation", affiliation.trim());
         }
         catch (JSONException e) {
             Toast.makeText(RegisterActivity.this, "JSON Error: " + e.toString(), Toast.LENGTH_SHORT).show();
@@ -397,8 +398,8 @@ public class RegisterActivity extends ActionBarActivity implements LoaderCallbac
                             String photoPostURL = obj.getString("photo_url"); //This photo URL is the URL for posting pictures. It is not the user's photoURL.
                             if (mCapturedImagePath != null) {
                                 UserRequest.postImage(context, mCapturedImagePath, photoPostURL, email, password);
-                            } //Else, completed without image taken
-                            UserRequest.getToken(context, email, password);
+                            } else
+                                UserRequest.getToken(context, email, password);
                         } catch (JSONException e) {
                             Toast.makeText(RegisterActivity.this, "JSON Error: " + e.toString(), Toast.LENGTH_SHORT).show();
                         }
